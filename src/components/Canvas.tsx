@@ -1,5 +1,10 @@
+import useWindowSize from "../hooks/useWindowSize";
+
 function Canvas() {
-return <canvas width={window.innerWidth} height={window.innerHeight} className="overflow-hidden bg-white"></canvas>
+  const [height, width] = useWindowSize();
+return <canvas width={width} height={height} className="overflow-hidden bg-white">
+
+</canvas>
 }
 
 export default Canvas;
