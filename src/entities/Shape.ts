@@ -1,5 +1,5 @@
 interface Shape {
-  type: "crcl" | "plgm" | "rect" | "trng" | "star",
+  type: "crcl" | "rect" | "trng" | "free",
   backgroundColor: string,
   id: string,
   x: number,

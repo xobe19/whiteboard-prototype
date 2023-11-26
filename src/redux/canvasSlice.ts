@@ -5,6 +5,7 @@ export interface CanvasState extends Canvas {
   vpOriginX: number;
   vpOriginY: number;
   scale: number;
+  mode: "drawing" | "creatingShape" | "select" | "dragging" | "rotating"
 }
 
 let initialState: CanvasState = {
@@ -13,6 +14,8 @@ let initialState: CanvasState = {
   vpOriginX: 0,
   vpOriginY: 0,
   rendered: false,
+  mode: "drawing"
+
 };
 
 export const canvasSlice = createSlice({
