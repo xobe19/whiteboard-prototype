@@ -1,7 +1,6 @@
 interface Shape {
   type: "crcl" | "rect" | "trng" | "free",
   backgroundColor: string,
-  id: string,
   x: number,
   y: number,
   width: number,
@@ -10,5 +9,6 @@ interface Shape {
   noteSafeY: number,
   noteSafeWidth: number,
   noteSafeHeight: number,
-  rotatedRadians: number
+  rotatedRadians: number,
+  points: number[][]
 }

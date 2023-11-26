@@ -1,21 +1,33 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { Canvas } from "../entities/Canvas";
+import { Canvas, toRealX, toRealY } from "../entities/Canvas";
 export interface CanvasState extends Canvas {
   rendered: false;
   vpOriginX: number;
   vpOriginY: number;
   scale: number;
-  mode: "drawing" | "creatingShape" | "select" | "dragging" | "rotating"
 }
 
 let initialState: CanvasState = {
-  shapes: [{backgroundColor: "blue", height: 100, width: 400, id: "whwatever", noteSafeHeight: 300, noteSafeWidth: 300, noteSafeX: 500, noteSafeY: 500, x: 500, y: 500, type: "rect", rotatedRadians: 0}],
+  shapes: [
+    {
+      backgroundColor: "blue",
+      height: 100,
+      width: 400,
+      noteSafeHeight: 300,
+      noteSafeWidth: 300,
+      noteSafeX: 500,
+      noteSafeY: 500,
+      x: 500,
+      y: 500,
+      type: "rect",
+      rotatedRadians: 0,
+      points: [],
+    },
+  ],
   scale: 1.0,
   vpOriginX: 0,
   vpOriginY: 0,
   rendered: false,
-  mode: "drawing"
-
 };
 
 export const canvasSlice = createSlice({
@@ -41,10 +53,38 @@ export const canvasSlice = createSlice({
       let newRendered = action.payload;
       state.rendered = newRendered;
     },
+    addShape: (state, action) => {
+      let shape = action.payload;
+      let shapeNew: Shape = {
+        ...shape,
+        x: toRealX(shape.x, state.vpOriginX, state.scale),
+        y: toRealY(shape.y, state.vpOriginY, state.scale),
+        width: shape.width / state.scale,
+        height: shape.height / state.scale,
+        noteSafeX: toRealX(shape.noteSafeX, state.vpOriginX, state.scale),
+        noteSafeY: toRealY(shape.noteSafeY, state.vpOriginY, state.scale),
+        noteSafeHeight: shape.noteSafeHeight / state.scale,
+        noteSafeWidth: shape.noteSafeWidth / state.scale,
+      };
+
+      for (let i = 0; i < shapeNew.points.length; i++) {
+        [shapeNew.points[i].x, shapeNew.points[i].y] = [
+          toRealX(shape.points[i].x, state.vpOriginX, state.scale),
+          toRealY(shape.points[i].y, state.vpOriginY, state.scale),
+        ];
+      }
+
+      state.shapes.push(shapeNew);
+    },
   },
 });
 
-export const { shiftOriginX, changeScale, shiftOriginY, setRendered } =
-  canvasSlice.actions;
+export const {
+  shiftOriginX,
+  changeScale,
+  shiftOriginY,
+  setRendered,
+  addShape,
+} = canvasSlice.actions;
 
 export const { reducer: canvasReducer } = canvasSlice;
