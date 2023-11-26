@@ -1,5 +1,5 @@
 interface Shape {
-  type: "crcl" | "oval" | "plgm" | "rect" | "trng" | "star",
+  type: "crcl" | "plgm" | "rect" | "trng" | "star",
   backgroundColor: string,
   id: string,
   x: number,
@@ -9,5 +9,6 @@ interface Shape {
   noteSafeX: number,
   noteSafeY: number,
   noteSafeWidth: number,
-  noteSafeHeight: number
+  noteSafeHeight: number,
+  rotatedRadians: number
 }

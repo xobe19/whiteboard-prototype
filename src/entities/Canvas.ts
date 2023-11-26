@@ -1,8 +1,6 @@
 export interface Canvas {
   shapes: Shape[],
-  vpOriginX: number,
-  vpOriginY: number,
-  scale: number,
+
  // TODO: arrows: Arrow[]
 }
 

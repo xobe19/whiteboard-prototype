@@ -8,7 +8,7 @@ export interface CanvasState extends Canvas {
 }
 
 let initialState: CanvasState = {
-  shapes: [],
+  shapes: [{backgroundColor: "blue", height: 100, width: 400, id: "whwatever", noteSafeHeight: 300, noteSafeWidth: 300, noteSafeX: 500, noteSafeY: 500, x: 500, y: 500, type: "rect", rotatedRadians: 0}],
   scale: 1.0,
   vpOriginX: 0,
   vpOriginY: 0,
