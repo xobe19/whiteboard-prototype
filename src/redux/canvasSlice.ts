@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { Canvas, toRealX, toRealY } from "../entities/Canvas";
+import { convertVirtualPointsToReal } from "../utils/canvas/convertVirtualPointsToReal";
 export interface CanvasState extends Canvas {
   rendered: false;
   vpOriginX: number;
@@ -67,12 +68,7 @@ export const canvasSlice = createSlice({
         noteSafeWidth: shape.noteSafeWidth / state.scale,
       };
 
-      for (let i = 0; i < shapeNew.points.length; i++) {
-        [shapeNew.points[i].x, shapeNew.points[i].y] = [
-          toRealX(shape.points[i].x, state.vpOriginX, state.scale),
-          toRealY(shape.points[i].y, state.vpOriginY, state.scale),
-        ];
-      }
+      convertVirtualPointsToReal(shapeNew, shape, state);
 
       state.shapes.push(shapeNew);
     },
@@ -88,3 +84,5 @@ export const {
 } = canvasSlice.actions;
 
 export const { reducer: canvasReducer } = canvasSlice;
+
+

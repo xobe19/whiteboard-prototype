@@ -10,5 +10,5 @@ interface Shape {
   noteSafeWidth: number,
   noteSafeHeight: number,
   rotatedRadians: number,
-  points: number[][]
+  points: {x: number, y: number}[] 
 }
