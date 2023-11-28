@@ -1,5 +1,6 @@
 import { toRealX, toRealY } from "../../entities/Canvas";
-import { CanvasState } from "../../redux/canvasSlice";
+import { Shape } from "../../entities/Shape";
+import { CanvasState } from "../../redux/types";
 
 export function convertVirtualPointsToReal(shapeNew: Shape, shape: Shape, state: CanvasState) {
   for (let i = 0; i < shapeNew.points.length; i++) {

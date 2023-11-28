@@ -1,6 +1,7 @@
+import { Shape } from "./Shape";
+
 export interface Canvas {
   shapes: Shape[],
-
  // TODO: arrows: Arrow[]
 }
 

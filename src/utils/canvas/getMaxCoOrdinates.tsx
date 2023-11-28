@@ -1,4 +1,6 @@
-export function getMaxCoOrdinates(points: { x: number; y: number; }[]) {
+import { Point } from "../../entities/Point";
+
+export function getMaxCoOrdinates(points: Point[]) {
   let maxX = points[0].x, maxY = points[0].y;
   for (let i = 1; i < points.length; i++) {
     maxX = Math.max(points[i].x, maxX);

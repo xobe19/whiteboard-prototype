@@ -1,3 +1,5 @@
+import { Point } from "../../entities/Point";
+
 export function drawFreeHand(
   c: CanvasRenderingContext2D,
   x: number,
@@ -5,7 +7,7 @@ export function drawFreeHand(
   width: number,
   height: number,
   rot: number,
-  points: { x: number; y: number }[]
+  points: Point[]
 ) {
   c.translate(x, y);
   c.rotate(rot);
@@ -24,14 +26,14 @@ export function drawFreeHand(
 
 export function drawFreeHandLive(
   c: CanvasRenderingContext2D,
-  points: { x: number; y: number }[]
+  points: Point[]
 ) {
   drawFreeHand(c, 0, 0, 0, 0, 0, points);
 }
 
 function drawCurve(
   ctx: CanvasRenderingContext2D,
-  points: { x: number; y: number }[],
+  points: Point[],
   tension: number
 ) {
   ctx.beginPath();

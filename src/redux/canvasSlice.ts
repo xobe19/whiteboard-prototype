@@ -1,12 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { Canvas, toRealX, toRealY } from "../entities/Canvas";
+import { toRealX, toRealY, toVirtualX, toVirtualY } from "../entities/Canvas";
 import { convertVirtualPointsToReal } from "../utils/canvas/convertVirtualPointsToReal";
-export interface CanvasState extends Canvas {
-  rendered: false;
-  vpOriginX: number;
-  vpOriginY: number;
-  scale: number;
-}
+import { Point } from "../entities/Point";
+import { Shape } from "../entities/Shape";
+import { isPointInBox } from "../utils/canvas/isPointInBox";
+import { CanvasState } from "./types";
+import { rotateCoordinates } from "../utils/canvas/rotateCoordinates";
 
 let initialState: CanvasState = {
   shapes: [
@@ -14,15 +13,16 @@ let initialState: CanvasState = {
       backgroundColor: "blue",
       height: 100,
       width: 400,
-      noteSafeHeight: 300,
-      noteSafeWidth: 300,
+      noteSafeHeight: 50,
+      noteSafeWidth: 200,
       noteSafeX: 500,
       noteSafeY: 500,
       x: 500,
       y: 500,
       type: "rect",
-      rotatedRadians: 0,
+      rotatedRadians: Math.PI / 3,
       points: [],
+      selected: false,
     },
   ],
   scale: 1.0,
@@ -72,6 +72,81 @@ export const canvasSlice = createSlice({
 
       state.shapes.push(shapeNew);
     },
+    selectShape: (state, action) => {
+      let point: Point = action.payload;
+
+      for (let i = 0; i < state.shapes.length; i++) {
+        let shape = state.shapes[i];
+        let virtual_x = toVirtualX(shape.x, state.vpOriginX, state.scale);
+        let virtual_y = toVirtualY(shape.y, state.vpOriginY, state.scale);
+        let { x: virtual_nsx, y: virtual_nsy } = rotateCoordinates(
+          { x: virtual_x, y: virtual_y },
+          {
+            x: toVirtualX(shape.noteSafeX, state.vpOriginX, state.scale),
+            y: toVirtualY(shape.noteSafeY, state.vpOriginY, state.scale),
+          },
+          shape.rotatedRadians
+        );
+
+        let pointInBox = isPointInBox(
+          rotateCoordinates(
+            { x: virtual_x, y: virtual_y },
+            point,
+            shape.rotatedRadians
+          ),
+          { x: virtual_x, y: virtual_y },
+          {
+            x: virtual_x + shape.width * state.scale,
+            y: virtual_y + shape.height * state.scale,
+          }
+        );
+        let pointInNoteBox = isPointInBox(
+          rotateCoordinates(
+            { x: virtual_x, y: virtual_y },
+            point,
+            shape.rotatedRadians
+          ),
+          { x: virtual_nsx, y: virtual_nsy },
+          {
+            x: virtual_nsx + shape.noteSafeWidth * state.scale,
+            y: virtual_nsy + shape.noteSafeHeight * state.scale,
+          }
+        );
+        if (pointInBox && !pointInNoteBox) {
+          state.shapes[i].selected = true;
+          console.log("selected");
+          return;
+        }
+      }
+      console.log("not selected");
+    },
+    deselectIfOutOfBounds: (state, action) => {
+      let point: Point = action.payload;
+      for (let i = 0; i < state.shapes.length; i++) {
+        let shape = state.shapes[i];
+        let virtual_x = toVirtualX(shape.x, state.vpOriginX, state.scale);
+        let virtual_y = toVirtualY(shape.y, state.vpOriginY, state.scale);
+        if (shape) {
+          if (
+            !isPointInBox(
+              rotateCoordinates(
+                { x: virtual_x, y: virtual_y },
+                point,
+                shape.rotatedRadians
+              ),
+              { x: virtual_x, y: virtual_y },
+              {
+                x: virtual_x + shape.width * state.scale,
+                y: virtual_y + shape.height * state.scale,
+              }
+            )
+          ) {
+            state.shapes[i].selected = false;
+            break;
+          }
+        }
+      }
+    },
   },
 });
 
@@ -81,8 +156,8 @@ export const {
   shiftOriginY,
   setRendered,
   addShape,
+  selectShape,
+  deselectIfOutOfBounds,
 } = canvasSlice.actions;
 
 export const { reducer: canvasReducer } = canvasSlice;
-
-

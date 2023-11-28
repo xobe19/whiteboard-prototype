@@ -3,6 +3,8 @@ import { useRef, useEffect } from "react";
 import {
   addShape,
   changeScale,
+  deselectIfOutOfBounds,
+  selectShape,
   shiftOriginX,
   shiftOriginY,
 } from "../redux/canvasSlice";
@@ -11,6 +13,7 @@ import { subscribeToStore } from "../utils/canvas/subscribeToStore";
 import {  drawFreeHandLive } from "../utils/canvas/drawFreeHand";
 import { getMinCoOrdinates } from "../utils/canvas/getMinCoOrdinates";
 import { getMaxCoOrdinates } from "../utils/canvas/getMaxCoOrdinates";
+import { Shape } from "../entities/Shape";
 
 function Canvas() {
   const [height, width] = useWindowSize();
@@ -40,10 +43,12 @@ function Canvas() {
     noteSafeX: 0,
     noteSafeY: 0,
     points: [],
+    selected : false
   });
+  // shanding = shrinking / expanding :P
   const drawingMode: React.MutableRefObject<
-    "drawing" | "creatingShape" | "select" | "dragging" | "rotating"
-  > = useRef("drawing");
+    "drawing" | "creatingShape" | "select" | "selected" | "shanding"
+  > = useRef("select");
 
   return (
     <canvas
@@ -53,18 +58,26 @@ function Canvas() {
       ref={canvasRef}
       onMouseDown={(evt) => {
         evt.preventDefault();
+        let cx = evt.clientX;
+        let cy = evt.clientY;
         if (evt.button === 2) {
           rightClick.current = true;
         }
         if (evt.button === 0) {
           leftClick.current = true;
-          if (drawingMode.current === "drawing") {
+          if(drawingMode.current === "select") {
+              dispatch(selectShape({x: cx, y: cy}));     
+          }
+          else if(drawingMode.current === "selected") {
+            dispatch(deselectIfOutOfBounds({x: cx, y: cy}));
+          }
+          else if (drawingMode.current === "drawing") {
             shapeInConstruction.current.points = [
-              { x: evt.clientX, y: evt.clientY },
+              { x: cx, y: cy },
             ];
           } else if (drawingMode.current === "creatingShape") {
-            shapeInConstruction.current.x = evt.clientX;
-            shapeInConstruction.current.y = evt.clientY;
+            shapeInConstruction.current.x = cx;
+            shapeInConstruction.current.y = cy;
           }
         }
       }}

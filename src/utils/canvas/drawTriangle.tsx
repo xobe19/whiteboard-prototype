@@ -1,8 +1,21 @@
-export function drawTriangle(c: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, rot: number) {
+export function drawTriangle(
+  c: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  rot: number
+) {
+  c.translate(x, y);
+  c.rotate(rot);
+
   c.beginPath();
-  c.moveTo(x + height * Math.sin(rot), y + height * Math.cos(rot));
-  c.lineTo(x + Math.sin(rot) * height + Math.cos(rot) * width, y + height * Math.cos(rot) - width * Math.sin(rot));
-  c.lineTo(x + (width / 2) * Math.cos(rot), y - (width / 2) * Math.sin(rot));
-  c.lineTo(x + height * Math.sin(rot), y + height * Math.cos(rot));
+  c.moveTo(0, height);
+  c.lineTo(width, height * Math.cos(rot));
+  c.lineTo(width / 2, 0);
+  c.lineTo(0, height);
   c.stroke();
+
+  c.rotate(-rot);
+  c.translate(-x, -y);
 }

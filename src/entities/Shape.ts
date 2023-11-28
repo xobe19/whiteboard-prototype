@@ -1,4 +1,6 @@
-interface Shape {
+import { Point } from "./Point";
+
+export interface Shape {
   type: "crcl" | "rect" | "trng" | "free",
   backgroundColor: string,
   x: number,
@@ -10,5 +12,6 @@ interface Shape {
   noteSafeWidth: number,
   noteSafeHeight: number,
   rotatedRadians: number,
-  points: {x: number, y: number}[] 
+  points: Point[],
+  selected: boolean 
 }

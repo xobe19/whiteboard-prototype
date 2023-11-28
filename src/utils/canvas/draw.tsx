@@ -1,5 +1,6 @@
 import {  toVirtualX, toVirtualY } from "../../entities/Canvas";
-import { CanvasState } from "../../redux/canvasSlice";
+import { Shape } from "../../entities/Shape";
+import { CanvasState } from "../../redux/types";
 import { drawCircle } from "./drawCircle";
 import { drawDots } from "./drawDots";
 import { drawFreeHand } from "./drawFreeHand";
