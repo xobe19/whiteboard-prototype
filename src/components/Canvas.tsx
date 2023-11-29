@@ -5,15 +5,18 @@ import {
   changeScale,
   deselectIfOutOfBounds,
   selectShape,
+  selectedMouseMove,
   shiftOriginX,
   shiftOriginY,
 } from "../redux/canvasSlice";
 import { useDispatch } from "react-redux/es/hooks/useDispatch";
 import { subscribeToStore } from "../utils/canvas/subscribeToStore";
-import {  drawFreeHandLive } from "../utils/canvas/drawFreeHand";
+import { drawFreeHandLive } from "../utils/canvas/drawFreeHand";
 import { getMinCoOrdinates } from "../utils/canvas/getMinCoOrdinates";
 import { getMaxCoOrdinates } from "../utils/canvas/getMaxCoOrdinates";
 import { Shape } from "../entities/Shape";
+import { DrawingMode } from "../redux/types";
+import { emptyShapeObjectFactory } from "../utils/canvas/emptyShapeObjectFactory";
 
 function Canvas() {
   const [height, width] = useWindowSize();
@@ -21,34 +24,30 @@ function Canvas() {
     useRef(null);
   const canvasContext: React.MutableRefObject<null | CanvasRenderingContext2D> =
     useRef(null);
+  const drawingMode: React.MutableRefObject<DrawingMode> = useRef("select");
   const dispatch = useDispatch();
-
+  const drawingModeListenerCallback = useRef((newDrawingMode: DrawingMode) => {
+    drawingMode.current = newDrawingMode;
+  });
   useEffect(() => {
     canvasContext.current = canvasRef.current!.getContext("2d");
-    subscribeToStore(canvasRef.current!, canvasContext.current!);
+    subscribeToStore(
+      canvasRef.current!,
+      canvasContext.current!,
+      drawingModeListenerCallback.current
+    );
   }, []);
 
   const rightClick = useRef(false);
   const leftClick = useRef(false);
-  const shapeInConstruction: React.MutableRefObject<Shape> = useRef({
-    x: 0,
-    y: 0,
-    backgroundColor: "#000000",
-    height: 0,
-    width: 0,
-    noteSafeHeight: 0,
-    noteSafeWidth: 0,
-    rotatedRadians: 0,
-    type: "free",
-    noteSafeX: 0,
-    noteSafeY: 0,
-    points: [],
-    selected : false
-  });
+  const shapeInConstruction: React.MutableRefObject<Shape> = useRef(
+    emptyShapeObjectFactory()
+  );
+
+  const selectedShape: React.MutableRefObject<Shape> = useRef(
+    emptyShapeObjectFactory()
+  );
   // shanding = shrinking / expanding :P
-  const drawingMode: React.MutableRefObject<
-    "drawing" | "creatingShape" | "select" | "selected" | "shanding"
-  > = useRef("select");
 
   return (
     <canvas
@@ -65,16 +64,12 @@ function Canvas() {
         }
         if (evt.button === 0) {
           leftClick.current = true;
-          if(drawingMode.current === "select") {
-              dispatch(selectShape({x: cx, y: cy}));     
-          }
-          else if(drawingMode.current === "selected") {
-            dispatch(deselectIfOutOfBounds({x: cx, y: cy}));
-          }
-          else if (drawingMode.current === "drawing") {
-            shapeInConstruction.current.points = [
-              { x: cx, y: cy },
-            ];
+          if (drawingMode.current === "select") {
+            dispatch(selectShape({ x: cx, y: cy }));
+          } else if (drawingMode.current === "selected") {
+            dispatch(deselectIfOutOfBounds({ x: cx, y: cy }));
+          } else if (drawingMode.current === "drawing") {
+            shapeInConstruction.current.points = [{ x: cx, y: cy }];
           } else if (drawingMode.current === "creatingShape") {
             shapeInConstruction.current.x = cx;
             shapeInConstruction.current.y = cy;
@@ -101,13 +96,18 @@ function Canvas() {
               });
             }
             if (canvasContext.current != null) {
-              drawFreeHandLive(canvasContext.current, shapeInConstruction.current.points)
-                        }
+              drawFreeHandLive(
+                canvasContext.current,
+                shapeInConstruction.current.points
+              );
+            }
           } else if (drawingMode.current === "creatingShape") {
             shapeInConstruction.current.width =
               evt.clientX - shapeInConstruction.current.x;
             shapeInConstruction.current.height =
               evt.clientY - shapeInConstruction.current.y;
+          } else if(drawingMode.current === "selected") {
+            dispatch(selectedMouseMove({movement: {x: evt.movementX, y: evt.movementY}, point: {x: evt.clientX, y: evt.clientY}}));
           }
         }
       }}

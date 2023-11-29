@@ -5,19 +5,20 @@ import { drawCircle } from "./drawCircle";
 import { drawDots } from "./drawDots";
 import { drawFreeHand } from "./drawFreeHand";
 import { drawRect } from "./drawRect";
+import { drawSelectionBox } from "./drawSelectionBox";
 import { drawTriangle } from "./drawTriangle";
 
 
 function drawShapes( c: CanvasRenderingContext2D, shapes: Shape[], state: CanvasState) {
   for(let shape of shapes) {
     if(shape.type == "crcl") {
-    drawCircle( c, toVirtualX(shape.x, state.vpOriginX, state.scale), toVirtualY(shape.x, state.vpOriginY, state.scale), (shape.width)*(state.scale), (shape.height)*(state.scale), shape.rotatedRadians);
+    drawCircle( c, toVirtualX(shape.x, state.vpOriginX, state.scale), toVirtualY(shape.y, state.vpOriginY, state.scale), (shape.width)*(state.scale), (shape.height)*(state.scale), shape.rotatedRadians);
     }
     else if(shape.type == "trng") {
-    drawTriangle( c, toVirtualX(shape.x, state.vpOriginX, state.scale), toVirtualY(shape.x, state.vpOriginY, state.scale), (shape.width)*(state.scale), (shape.height)*(state.scale), shape.rotatedRadians);
+    drawTriangle( c, toVirtualX(shape.x, state.vpOriginX, state.scale), toVirtualY(shape.y, state.vpOriginY, state.scale), (shape.width)*(state.scale), (shape.height)*(state.scale), shape.rotatedRadians);
     }
     else if(shape.type == "rect") {
-    drawRect( c, toVirtualX(shape.x, state.vpOriginX, state.scale), toVirtualY(shape.x, state.vpOriginY, state.scale), (shape.width)*(state.scale), (shape.height)*(state.scale), shape.rotatedRadians);
+    drawRect( c, toVirtualX(shape.x, state.vpOriginX, state.scale), toVirtualY(shape.y, state.vpOriginY, state.scale), (shape.width)*(state.scale), (shape.height)*(state.scale), shape.rotatedRadians);
     }
     else {
       drawFreeHand(c, toVirtualX(shape.x, state.vpOriginX, state.scale), toVirtualY(shape.y, state.vpOriginY, state.scale), (shape.width)*(state.scale), (shape.height)*(state.scale), shape.rotatedRadians, shape.points.map((pnt) => {return {x: toVirtualX(pnt.x, state.vpOriginX, state.scale),y: toVirtualY(pnt.y, state.vpOriginY, state.scale)}}));
@@ -52,8 +53,18 @@ export function draw(
     state.scale
   );
 
+  console.log("shape drawing on: ");
+
 
   drawShapes( canvasContext, state.shapes, state)
+
+  for(let i = 0; i < state.shapes.length; i++) {
+    if(state.shapes[i].selected) {
+      console.log("selection drawing on:");
+      drawSelectionBox(canvasContext, {x: toVirtualX(state.shapes[i].x, state.vpOriginX, state.scale), y: toVirtualY(state.shapes[i].y, state.vpOriginY, state.scale)}, state.shapes[i].width*state.scale, state.shapes[i].height*state.scale, state.shapes[i].rotatedRadians);
+      break;
+    }
+  }
 
   canvasContext.lineWidth = origLW
 }

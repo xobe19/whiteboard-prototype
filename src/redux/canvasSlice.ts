@@ -4,8 +4,9 @@ import { convertVirtualPointsToReal } from "../utils/canvas/convertVirtualPoints
 import { Point } from "../entities/Point";
 import { Shape } from "../entities/Shape";
 import { isPointInBox } from "../utils/canvas/isPointInBox";
-import { CanvasState } from "./types";
+import { CanvasState, DrawingMode } from "./types";
 import { rotateCoordinates } from "../utils/canvas/rotateCoordinates";
+import { getSelectionBoxInteraction } from "../utils/canvas/getSelectionBoxInteraction";
 
 let initialState: CanvasState = {
   shapes: [
@@ -29,6 +30,7 @@ let initialState: CanvasState = {
   vpOriginX: 0,
   vpOriginY: 0,
   rendered: false,
+  drawingMode: "select",
 };
 
 export const canvasSlice = createSlice({
@@ -71,7 +73,9 @@ export const canvasSlice = createSlice({
       convertVirtualPointsToReal(shapeNew, shape, state);
 
       state.shapes.push(shapeNew);
+      state.rendered = false;
     },
+
     selectShape: (state, action) => {
       let point: Point = action.payload;
 
@@ -114,19 +118,22 @@ export const canvasSlice = createSlice({
         );
         if (pointInBox && !pointInNoteBox) {
           state.shapes[i].selected = true;
+          state.drawingMode = "selected";
           console.log("selected");
+          state.rendered = false;
           return;
         }
       }
       console.log("not selected");
     },
     deselectIfOutOfBounds: (state, action) => {
+      console.log("deselect called");
       let point: Point = action.payload;
       for (let i = 0; i < state.shapes.length; i++) {
         let shape = state.shapes[i];
         let virtual_x = toVirtualX(shape.x, state.vpOriginX, state.scale);
         let virtual_y = toVirtualY(shape.y, state.vpOriginY, state.scale);
-        if (shape) {
+        if (shape.selected) {
           if (
             !isPointInBox(
               rotateCoordinates(
@@ -141,8 +148,57 @@ export const canvasSlice = createSlice({
               }
             )
           ) {
-            state.shapes[i].selected = false;
+            shape.selected = false;
+            state.rendered = false;
+            state.drawingMode = "select";
+            console.log("deselect success");
             break;
+          }
+        }
+      }
+    },
+    selectedMouseMove: (state, action) => {
+      let { movement, point } = action.payload;
+      let deltaX = movement.x / state.scale;
+      let deltaY = movement.y / state.scale;
+      let shapes = state.shapes;
+      for (let i = 0; i < shapes.length; i++) {
+        if (shapes[i].selected) {
+          let shape = shapes[i];
+          let virtual_x = toVirtualX(shape.x, state.vpOriginX, state.scale);
+          let virtual_y = toVirtualY(shape.y, state.vpOriginY, state.scale);
+
+          let boxInteraction = getSelectionBoxInteraction(
+            rotateCoordinates(
+              { x: virtual_x, y: virtual_y },
+              point,
+              shape.rotatedRadians
+            ),
+            {
+              x: virtual_x,
+              y: virtual_y,
+            },
+            {
+              x: virtual_x + shape.width * state.scale,
+              y: virtual_y + shape.height * state.scale,
+            }
+          );
+
+
+          if(boxInteraction == null) {
+
+          console.log("selected mouse move");
+          shapes[i].x += deltaX;
+          shapes[i].y += deltaY;
+          shapes[i].noteSafeX += deltaX;
+          shapes[i].noteSafeY += deltaY;
+          state.rendered = false;
+          return;
+
+          }
+          else  {
+            console.log("box interaction is:");
+            console.log(boxInteraction);
           }
         }
       }
@@ -158,6 +214,7 @@ export const {
   addShape,
   selectShape,
   deselectIfOutOfBounds,
+  selectedMouseMove,
 } = canvasSlice.actions;
 
 export const { reducer: canvasReducer } = canvasSlice;
