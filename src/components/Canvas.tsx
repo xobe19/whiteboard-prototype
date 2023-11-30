@@ -4,6 +4,7 @@ import {
   addShape,
   changeScale,
   deselectIfOutOfBounds,
+  mouseMovementEnded,
   selectShape,
   selectedMouseMove,
   shiftOriginX,
@@ -29,17 +30,26 @@ function Canvas() {
   const drawingModeListenerCallback = useRef((newDrawingMode: DrawingMode) => {
     drawingMode.current = newDrawingMode;
   });
+
+
   useEffect(() => {
     canvasContext.current = canvasRef.current!.getContext("2d");
     subscribeToStore(
       canvasRef.current!,
       canvasContext.current!,
-      drawingModeListenerCallback.current
+      drawingModeListenerCallback.current,
     );
+    window.addEventListener('keydown', () => {
+      ctrlPressed.current = true;
+    });
+    window.addEventListener('keyup', () => {
+      ctrlPressed.current = false;
+    });
   }, []);
 
   const rightClick = useRef(false);
   const leftClick = useRef(false);
+  const ctrlPressed = useRef(false);
   const shapeInConstruction: React.MutableRefObject<Shape> = useRef(
     emptyShapeObjectFactory()
   );
@@ -53,7 +63,7 @@ function Canvas() {
     <canvas
       width={width}
       height={height}
-      className="overflow-hidden bg-white"
+      className="overflow-hidden bg-white fixed top-0 left-0"
       ref={canvasRef}
       onMouseDown={(evt) => {
         evt.preventDefault();
@@ -107,7 +117,7 @@ function Canvas() {
             shapeInConstruction.current.height =
               evt.clientY - shapeInConstruction.current.y;
           } else if(drawingMode.current === "selected") {
-            dispatch(selectedMouseMove({movement: {x: evt.movementX, y: evt.movementY}, point: {x: evt.clientX, y: evt.clientY}}));
+            dispatch(selectedMouseMove({movement: {x: evt.movementX, y: evt.movementY}, point: {x: evt.clientX, y: evt.clientY}, rotate: ctrlPressed.current}));
           }
         }
       }}
@@ -140,6 +150,8 @@ function Canvas() {
               evt.clientX - shapeInConstruction.current.x;
             shapeInConstruction.current.height =
               evt.clientY - shapeInConstruction.current.y;
+          } else if(drawingMode.current === "selected") {
+            dispatch(mouseMovementEnded());
           }
         }
       }}

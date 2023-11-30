@@ -14,6 +14,7 @@ export function emptyShapeObjectFactory(): Shape {
     noteSafeX: 0,
     noteSafeY: 0,
     points: [],
-    selected : false
+    selected : false,
+    interacting: false
   };
 }
