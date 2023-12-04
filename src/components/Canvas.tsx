@@ -17,7 +17,7 @@ import { getMinCoOrdinates } from "../utils/canvas/getMinCoOrdinates";
 import { getMaxCoOrdinates } from "../utils/canvas/getMaxCoOrdinates";
 import { Shape } from "../entities/Shape";
 import { DrawingMode } from "../redux/types";
-import { emptyShapeObjectFactory } from "../utils/canvas/emptyShapeObjectFactory";
+import { emptyShapeStateObjectFactory } from "../utils/canvas/emptyShapeObjectFactory";
 
 function Canvas() {
   const [height, width] = useWindowSize();
@@ -51,13 +51,12 @@ function Canvas() {
   const leftClick = useRef(false);
   const ctrlPressed = useRef(false);
   const shapeInConstruction: React.MutableRefObject<Shape> = useRef(
-    emptyShapeObjectFactory()
+    emptyShapeStateObjectFactory()
   );
 
   const selectedShape: React.MutableRefObject<Shape> = useRef(
-    emptyShapeObjectFactory()
+    emptyShapeStateObjectFactory()
   );
-  // shanding = shrinking / expanding :P
 
   return (
     <canvas

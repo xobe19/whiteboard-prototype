@@ -2,11 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { toRealX, toRealY, toVirtualX, toVirtualY } from "../entities/Canvas";
 import { convertVirtualPointsToReal } from "../utils/canvas/convertVirtualPointsToReal";
 import { Point } from "../entities/Point";
-import { Shape } from "../entities/Shape";
 import { isPointInBox } from "../utils/canvas/isPointInBox";
-import { CanvasState, DrawingMode } from "./types";
+import { CanvasState , ShapeState } from "./types";
 import { rotateCoordinates } from "../utils/canvas/rotateCoordinates";
-import { getSelectionBoxInteraction } from "../utils/canvas/getSelectionBoxInteraction";
 import { isSelectionBoxInteracting } from "../utils/canvas/isSelectionBoxInteracting";
 import { angleBetweenLines } from "../utils/canvas/angleBetweenLines";
 
@@ -26,7 +24,9 @@ let initialState: CanvasState = {
       rotatedRadians: Math.PI / 3,
       points: [],
       selected: false,
-      interacting: false
+      interacting: false,
+      heightDrawnAt: 100,
+      widthDrawnAt: 400
     },
   ],
   scale: 1.0,
@@ -61,7 +61,7 @@ export const canvasSlice = createSlice({
     },
     addShape: (state, action) => {
       let shape = action.payload;
-      let shapeNew: Shape = {
+      let shapeNew: ShapeState = {
         ...shape,
         x: toRealX(shape.x, state.vpOriginX, state.scale),
         y: toRealY(shape.y, state.vpOriginY, state.scale),

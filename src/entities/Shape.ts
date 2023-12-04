@@ -13,6 +13,6 @@ export interface Shape {
   noteSafeHeight: number,
   rotatedRadians: number,
   points: Point[],
-  selected: boolean,
-  interacting: boolean 
+  widthDrawnAt: number,
+  heightDrawnAt: number
 }

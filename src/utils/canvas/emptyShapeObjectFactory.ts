@@ -1,6 +1,6 @@
-import { Shape } from "../../entities/Shape";
+import { ShapeState } from "../../redux/types";
 
-export function emptyShapeObjectFactory(): Shape {
+export function emptyShapeStateObjectFactory(): ShapeState {
   return {
     x: 0,
     y: 0,
@@ -15,6 +15,8 @@ export function emptyShapeObjectFactory(): Shape {
     noteSafeY: 0,
     points: [],
     selected : false,
-    interacting: false
+    interacting: false,
+    widthDrawnAt: 0,
+    heightDrawnAt: 0
   };
 }
