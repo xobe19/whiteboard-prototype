@@ -2,6 +2,5 @@ import { SolidShape } from "./SolidShape";
 import { FreeDrawnShape } from "./FreeDrawnShape";
 
 export interface Canvas {
-  shapes: (SolidShape | FreeDrawnShape)[],
+  shapes: (SolidShape | FreeDrawnShape)[];
 }
-
