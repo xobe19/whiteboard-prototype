@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { Canvas, CanvasMode, SolidShape } from "./types";
+import { createAction, createReducer, createSlice } from "@reduxjs/toolkit";
+import { Canvas, CanvasMode, Point, SolidShape } from "./types";
 
 let sampleShape1: SolidShape = {
   backgroundColor: "blue",
@@ -19,12 +19,18 @@ let initialState: Canvas = {
   mode: CanvasMode.Default,
   zoom: 1.0,
   currentOrigin: { x: 0, y: 0 },
+  isCtrlDown: false,
+  isMouseDown: false,
+  previousMouseDown: [],
 };
 
-export const canvasSlice = createSlice({
-  name: "canvas",
-  initialState,
-  reducers: {},
+let mouseDown = createAction<Point>("canvas/mouseDown");
+
+const canvasReducer = createReducer(initialState, (builder) => {
+  builder.addCase(mouseDown, (state, action) => {
+    if (state.mode == CanvasMode.ShapeCreate) {
+    }
+  });
 });
 
-initialState;
+export { canvasReducer };

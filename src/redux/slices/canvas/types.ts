@@ -38,4 +38,7 @@ export interface Canvas {
   zoom: number;
   shapes: (SolidShape | FreeDrawnShape)[];
   mode: CanvasMode;
+  isMouseDown: boolean;
+  isCtrlDown: boolean;
+  previousMouseDown: Point[];
 }
