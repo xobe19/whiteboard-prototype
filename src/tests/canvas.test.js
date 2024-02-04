@@ -6,6 +6,7 @@ import {
   mouseUp,
   changeCanvasMode,
   panCanvas,
+  zoomCanvas,
 } from "../redux/slices/canvas/slice";
 let store = configureStore({ reducer: { canvas: canvasReducer } });
 
@@ -61,4 +62,22 @@ test("adding shapes in even weird way (with panning)", () => {
   });
   expect(recently_inserted_shape.width).toBe(1);
   expect(recently_inserted_shape.height).toBe(2);
+});
+
+test("adding shapes while zoomed in", () => {
+  store.dispatch(zoomCanvas(1));
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ x: 5, y: 4 }));
+  expect(store.getState().canvas.mode).toBe(CanvasMode.CreatingShape);
+  store.dispatch(mouseUp({ x: 4, y: 6 }));
+  expect(store.getState().canvas.mode).toBe(CanvasMode.Default);
+  // get the newly inserted shape
+  let shapes = store.getState().canvas.shapes;
+  let recently_inserted_shape = shapes[shapes.length - 1];
+  expect(recently_inserted_shape.shapeTopLeftCoordinates).toStrictEqual({
+    x: 2,
+    y: -2,
+  });
+  expect(recently_inserted_shape.width).toBeCloseTo(0.5);
+  expect(recently_inserted_shape.height).toBe(1);
 });
