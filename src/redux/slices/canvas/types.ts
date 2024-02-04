@@ -3,9 +3,11 @@ export interface Point {
   y: number;
 }
 
+type solidShapeType = "crcl" | "rect" | "trng";
+
 export interface SolidShape {
   id: string;
-  type: "crcl" | "rect" | "trng";
+  type: solidShapeType;
   backgroundColor: string;
   backgroundFilled: boolean;
   shapeTopLeftCoordinates: Point;
@@ -16,21 +18,24 @@ export interface SolidShape {
 }
 
 export interface FreeDrawnShape {
-  id: string;
   initiallyDrawnPointsRelativeToTopLeft: Point[];
   topLeftCoordinates: Point;
   width: number;
   height: number;
   xAxisInclination: number;
-  strokeColor: string;
 }
 
 export enum CanvasMode {
-  ShapeCreateInit,
-  ShapeCreateMiddle,
+  ShapeCreateP1,
+  ShapeCreateP2,
   FreeDraw,
   Default,
   ShapeModify,
+}
+
+export interface Toolbox {
+  selectedColor: string;
+  selectedSolidShapeType: solidShapeType;
 }
 
 export interface Canvas {
@@ -39,6 +44,7 @@ export interface Canvas {
   zoom: number;
   shapes: (SolidShape | FreeDrawnShape)[];
   mode: CanvasMode;
+  toolbox: Toolbox;
   isMouseDown: boolean;
   isCtrlDown: boolean;
   previousMouseDown: Point[];

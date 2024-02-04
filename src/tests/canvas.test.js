@@ -1,6 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { CanvasMode } from "../redux/slices/canvas/types";
-import { canvasReducer } from "../redux/slices/canvas/slice";
+import {
+  canvasReducer,
+  mouseDown,
+  mouseUp,
+  changeCanvasMode,
+} from "../redux/slices/canvas/slice";
 let store = configureStore({ reducer: { canvas: canvasReducer } });
 
 beforeEach(() => {
@@ -13,9 +18,9 @@ afterEach(() => {
 
 test("create solid shape", () => {
   let old_shape_cnt = store.getState().canvas.shapes.length;
-  store.dispatch(changeCanvasMode(CanvasMode.ShapeCreateInit));
+  store.dispatch(changeCanvasMode(CanvasMode.ShapeCreateP1));
   store.dispatch(mouseDown({ x: 200, y: 200 }));
-  expect(store.getState().canvas.mode).toBe(CanvasMode.ShapeCreateMiddle);
+  expect(store.getState().canvas.mode).toBe(CanvasMode.ShapeCreateP2);
   store.dispatch(mouseUp({ x: 300, y: 400 }));
   expect(store.getState().canvas.mode).toBe(CanvasMode.Default);
   let new_shape_cnt = store.getState().canvas.shapes.length;
