@@ -3,9 +3,11 @@ export interface Point {
   y: number;
 }
 
-export interface Delta {
+export interface MouseMoveData {
   deltaX: number;
   deltaY: number;
+  x: number;
+  y: number;
 }
 
 type solidShapeType = "crcl" | "rect" | "trng";
@@ -23,10 +25,9 @@ export interface SolidShape {
 }
 
 export interface FreeDrawnShape {
-  initiallyDrawnPointsRelativeToTopLeft: Point[];
-  topLeftCoordinates: Point;
-  width: number;
-  height: number;
+  id: string;
+  realPoints: Point[];
+  strokeColor: string;
   xAxisInclination: number;
 }
 
@@ -50,6 +51,8 @@ export interface Canvas {
   mode: CanvasMode;
   toolbox: Toolbox;
   isMouseDown: boolean;
+  isRightMouseDown: boolean;
   isCtrlDown: boolean;
   previousMouseDown?: Point;
+  currFreeDrawPoints: Point[];
 }

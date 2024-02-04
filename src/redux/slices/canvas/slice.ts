@@ -1,5 +1,12 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
-import { Canvas, CanvasMode, Delta, Point, SolidShape } from "./types";
+import {
+  Canvas,
+  CanvasMode,
+  FreeDrawnShape,
+  MouseMoveData,
+  Point,
+  SolidShape,
+} from "./types";
 import { uniqueId } from "../../../utils/getRandomID";
 import { getRealPoint } from "./utils";
 
@@ -27,13 +34,17 @@ let initialState: Canvas = {
   b: { x: 0, y: 0 },
   isCtrlDown: false,
   isMouseDown: false,
+  isRightMouseDown: false,
+  currFreeDrawPoints: [],
 };
 
 // ------- ACTIONS ---------
 let mouseDown = createAction<Point>("canvas/mouseDown");
+let rightMouseDown = createAction("canvas/rightMouseDown");
+let rightMouseUp = createAction("canvas/rightMouseUp");
 let mouseUp = createAction<Point>("canvas/mouseUp");
+let mouseMove = createAction<MouseMoveData>("canvas/mouseMove");
 let changeCanvasMode = createAction<CanvasMode>("canvas/changeCanvasMode");
-let panCanvas = createAction<Delta>("canvas/panCanvas");
 let zoomCanvas = createAction<number>("canvas/zoomCanvas");
 
 // -------- REDUCER ----------
@@ -45,9 +56,11 @@ const canvasReducer = createReducer(initialState, (builder) => {
     .addCase(mouseDown, (state, action) => {
       let mdPoint = getRealPoint(state.b, action.payload, state.zoom);
       if (state.mode === CanvasMode.CreateShape) {
-        state.previousMouseDown = mdPoint;
-        state.isMouseDown = true;
+      } else if (state.mode === CanvasMode.FreeDraw) {
+        state.currFreeDrawPoints = [mdPoint];
       }
+      state.previousMouseDown = mdPoint;
+      state.isMouseDown = true;
     })
     .addCase(mouseUp, (state, action) => {
       let muPoint = getRealPoint(state.b, action.payload, state.zoom);
@@ -69,16 +82,42 @@ const canvasReducer = createReducer(initialState, (builder) => {
         };
         state.shapes.push(newShape);
         state.mode = CanvasMode.Default;
+      } else if (state.mode === CanvasMode.FreeDraw) {
+        let newShape: FreeDrawnShape = {
+          id: uniqueId(),
+          realPoints: state.currFreeDrawPoints,
+          strokeColor: state.toolbox.selectedColor,
+          xAxisInclination: 0,
+        };
+        state.shapes.push(newShape);
+        state.mode = CanvasMode.Default;
       }
+      state.isMouseDown = false;
     })
+    .addCase(rightMouseDown, (state) => {
+      state.isRightMouseDown = true;
+    })
+    .addCase(rightMouseUp, (state) => {
+      state.isRightMouseDown = false;
+    })
+
     .addCase(changeCanvasMode, (state, action) => {
       let newCanvasMode = action.payload;
       state.mode = newCanvasMode;
     })
-    .addCase(panCanvas, (state, action) => {
-      let delta = action.payload;
-      state.b.x -= delta.deltaX / state.zoom;
-      state.b.y += delta.deltaY / state.zoom;
+    .addCase(mouseMove, (state, action) => {
+      let movData = action.payload;
+      movData.deltaX /= state.zoom;
+      movData.deltaY /= state.zoom;
+      let pnt = getRealPoint(state.b, movData, state.zoom);
+      movData.x = pnt.x;
+      movData.y = pnt.y;
+      if (state.mode === CanvasMode.Default && state.isRightMouseDown) {
+        state.b.x -= movData.deltaX;
+        state.b.y += movData.deltaY;
+      } else if (state.mode === CanvasMode.FreeDraw && state.isMouseDown) {
+        state.currFreeDrawPoints.push({ x: movData.x, y: movData.y });
+      }
     })
     .addCase(zoomCanvas, (state, action) => {
       let delta = action.payload;
@@ -91,6 +130,8 @@ export {
   mouseDown,
   mouseUp,
   changeCanvasMode,
-  panCanvas,
   zoomCanvas,
+  mouseMove,
+  rightMouseUp,
+  rightMouseDown,
 };

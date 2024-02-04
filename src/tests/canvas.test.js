@@ -7,6 +7,9 @@ import {
   changeCanvasMode,
   panCanvas,
   zoomCanvas,
+  mouseMove,
+  rightMouseDown,
+  rightMouseUp,
 } from "../redux/slices/canvas/slice";
 let store = configureStore({ reducer: { canvas: canvasReducer } });
 
@@ -45,7 +48,9 @@ test("adding shapes in a weird way (without panning)", () => {
 });
 
 test("adding shapes in even weird way (with panning)", () => {
-  store.dispatch(panCanvas({ deltaX: 1, deltaY: 1 }));
+  store.dispatch(rightMouseDown());
+  store.dispatch(mouseMove({ deltaX: 1, deltaY: 1, x: 1, y: 1 }));
+  store.dispatch(rightMouseUp());
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ x: 5, y: 4 }));
   store.dispatch(mouseUp({ x: 4, y: 6 }));
