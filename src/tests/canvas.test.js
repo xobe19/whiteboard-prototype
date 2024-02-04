@@ -24,6 +24,35 @@ test("create solid shape", () => {
   store.dispatch(mouseUp({ x: 300, y: 400 }));
   expect(store.getState().canvas.mode).toBe(CanvasMode.Default);
   let new_shape_cnt = store.getState().canvas.shapes.length;
-
   expect(new_shape_cnt - old_shape_cnt).toBe(1);
+});
+
+test("adding shapes in a weird way", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.ShapeCreateP1));
+  store.dispatch(mouseDown({ x: 400, y: 300 }));
+  expect(store.getState().canvas.mode).toBe(CanvasMode.ShapeCreateP2);
+  store.dispatch(mouseUp({ x: 100, y: 500 }));
+  expect(store.getState().canvas.mode).toBe(CanvasMode.Default);
+  // get the newly inserted shape
+  let shapes = store.getState().canvas.shapes;
+  let recently_inserted_shape = shapes[shapes.length - 1];
+  expect(recently_inserted_shape.shapeTopLeftCoordinates).toStrictEqual({
+    x: 100,
+    y: 500,
+  });
+});
+
+test("adding shapes in even weird way", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.ShapeCreateP1));
+  store.dispatch(mouseDown({ x: 200, y: 200 }));
+  expect(store.getState().canvas.mode).toBe(CanvasMode.ShapeCreateP2);
+  store.dispatch(mouseUp({ x: 300, y: 400 }));
+  expect(store.getState().canvas.mode).toBe(CanvasMode.Default);
+
+  let shapes = store.getState().canvas.shapes;
+  let recently_inserted_shape = shapes[shapes.length - 1];
+  expect(recently_inserted_shape.shapeTopLeftCoordinates).toStrictEqual({
+    x: 200,
+    y: 400,
+  });
 });
