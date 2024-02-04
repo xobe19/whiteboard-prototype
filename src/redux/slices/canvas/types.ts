@@ -32,7 +32,6 @@ export interface FreeDrawnShape {
 
 export enum CanvasMode {
   CreateShape,
-  CreatingShape,
   FreeDraw,
   Default,
   ShapeModify,
