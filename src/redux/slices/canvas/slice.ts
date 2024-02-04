@@ -23,7 +23,7 @@ let initialState: Canvas = {
     selectedSolidShapeType: "rect",
   },
   zoom: 1.0,
-  currentOrigin: { x: 0, y: 0 },
+  b: { x: 0, y: 0 },
   isCtrlDown: false,
   isMouseDown: false,
   previousMouseDown: [],

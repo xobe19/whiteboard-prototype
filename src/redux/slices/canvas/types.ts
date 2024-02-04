@@ -40,7 +40,7 @@ export interface Toolbox {
 
 export interface Canvas {
   id: string;
-  currentOrigin: Point;
+  b: Point;
   zoom: number;
   shapes: (SolidShape | FreeDrawnShape)[];
   mode: CanvasMode;
