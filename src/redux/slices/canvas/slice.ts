@@ -39,15 +39,15 @@ const canvasReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(mouseDown, (state, action) => {
       let mdPoint = action.payload;
-      if (state.mode === CanvasMode.ShapeCreateP1) {
+      if (state.mode === CanvasMode.CreateShape) {
         state.previousMouseDown = [mdPoint];
-        state.mode = CanvasMode.ShapeCreateP2;
+        state.mode = CanvasMode.CreatingShape;
         state.isMouseDown = true;
       }
     })
     .addCase(mouseUp, (state, action) => {
       let muPoint = action.payload;
-      if (state.mode === CanvasMode.ShapeCreateP2) {
+      if (state.mode === CanvasMode.CreatingShape) {
         let mdPoint = state.previousMouseDown[0];
         let newShape: SolidShape = {
           shapeTopLeftCoordinates: {
