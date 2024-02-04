@@ -1,6 +1,7 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
-import { Canvas, CanvasMode, Point, SolidShape } from "./types";
+import { Canvas, CanvasMode, Delta, Point, SolidShape } from "./types";
 import { uniqueId } from "../../../utils/getRandomID";
+import { getRealPoint } from "./utils";
 
 let sampleShape1: SolidShape = {
   backgroundColor: "blue",
@@ -33,12 +34,17 @@ let initialState: Canvas = {
 let mouseDown = createAction<Point>("canvas/mouseDown");
 let mouseUp = createAction<Point>("canvas/mouseUp");
 let changeCanvasMode = createAction<CanvasMode>("canvas/changeCanvasMode");
+let panCanvas = createAction<Delta>("canvas/panCanvas");
+let zoomCanvas = createAction<number>("canvas/zoomCanvas");
 
 // -------- REDUCER ----------
+
+// note: converting virtual points to real as soon as we get a click (i. e, in action.paylod itself)
+
 const canvasReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(mouseDown, (state, action) => {
-      let mdPoint = action.payload;
+      let mdPoint = getRealPoint(state.b, action.payload, state.zoom);
       if (state.mode === CanvasMode.CreateShape) {
         state.previousMouseDown = [mdPoint];
         state.mode = CanvasMode.CreatingShape;
@@ -46,13 +52,13 @@ const canvasReducer = createReducer(initialState, (builder) => {
       }
     })
     .addCase(mouseUp, (state, action) => {
-      let muPoint = action.payload;
+      let muPoint = getRealPoint(state.b, action.payload, state.zoom);
       if (state.mode === CanvasMode.CreatingShape) {
         let mdPoint = state.previousMouseDown[0];
         let newShape: SolidShape = {
           shapeTopLeftCoordinates: {
             x: Math.min(mdPoint.x, muPoint.x),
-            y: Math.min(mdPoint.y, muPoint.y),
+            y: Math.max(mdPoint.y, muPoint.y),
           },
           xAxisInclination: 0,
           id: uniqueId(),
@@ -70,7 +76,23 @@ const canvasReducer = createReducer(initialState, (builder) => {
     .addCase(changeCanvasMode, (state, action) => {
       let newCanvasMode = action.payload;
       state.mode = newCanvasMode;
+    })
+    .addCase(panCanvas, (state, action) => {
+      let delta = action.payload;
+      state.b.x -= delta.deltaX / state.zoom;
+      state.b.y += delta.deltaY / state.zoom;
+    })
+    .addCase(zoomCanvas, (state, action) => {
+      let delta = action.payload;
+      state.zoom += delta;
     });
 });
 
-export { canvasReducer, mouseDown, mouseUp, changeCanvasMode };
+export {
+  canvasReducer,
+  mouseDown,
+  mouseUp,
+  changeCanvasMode,
+  panCanvas,
+  zoomCanvas,
+};

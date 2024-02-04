@@ -3,6 +3,11 @@ export interface Point {
   y: number;
 }
 
+export interface Delta {
+  deltaX: number;
+  deltaY: number;
+}
+
 type solidShapeType = "crcl" | "rect" | "trng";
 
 export interface SolidShape {
