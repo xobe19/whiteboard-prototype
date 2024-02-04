@@ -27,7 +27,6 @@ let initialState: Canvas = {
   b: { x: 0, y: 0 },
   isCtrlDown: false,
   isMouseDown: false,
-  previousMouseDown: [],
 };
 
 // ------- ACTIONS ---------
@@ -46,14 +45,14 @@ const canvasReducer = createReducer(initialState, (builder) => {
     .addCase(mouseDown, (state, action) => {
       let mdPoint = getRealPoint(state.b, action.payload, state.zoom);
       if (state.mode === CanvasMode.CreateShape) {
-        state.previousMouseDown = [mdPoint];
+        state.previousMouseDown = mdPoint;
         state.isMouseDown = true;
       }
     })
     .addCase(mouseUp, (state, action) => {
       let muPoint = getRealPoint(state.b, action.payload, state.zoom);
       if (state.mode === CanvasMode.CreateShape) {
-        let mdPoint = state.previousMouseDown[0];
+        let mdPoint = state.previousMouseDown!;
         let newShape: SolidShape = {
           shapeTopLeftCoordinates: {
             x: Math.min(mdPoint.x, muPoint.x),

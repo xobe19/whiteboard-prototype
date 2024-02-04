@@ -51,5 +51,5 @@ export interface Canvas {
   toolbox: Toolbox;
   isMouseDown: boolean;
   isCtrlDown: boolean;
-  previousMouseDown: Point[];
+  previousMouseDown?: Point;
 }
