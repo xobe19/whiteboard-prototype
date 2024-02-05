@@ -82,3 +82,21 @@ test("adding shapes while zoomed in", () => {
   expect(recently_inserted_shape.width).toBeCloseTo(0.5);
   expect(recently_inserted_shape.height).toBe(1);
 });
+
+test("testing free drawing", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.FreeDraw));
+  store.dispatch(mouseMove({ x: 1, y: 1, deltaX: 1, deltaY: 1 }));
+  store.dispatch(mouseDown({ x: 1, y: 1 }));
+  store.dispatch(mouseMove({ x: 2, y: 2, deltaX: 1, deltaY: 1 }));
+  store.dispatch(mouseMove({ x: 3, y: 3, deltaX: 1, deltaY: 1 }));
+  store.dispatch(mouseUp({ x: 3, y: 3 }));
+  store.dispatch(mouseMove({ x: 4, y: 4, deltaX: 1, deltaY: 1 }));
+  let shapes = store.getState().canvas.shapes;
+  let recently_inserted_shape = shapes[shapes.length - 1];
+  expect(recently_inserted_shape.realPoints.length).toBe(3);
+  expect(recently_inserted_shape.realPoints).toStrictEqual([
+    { x: 1, y: -1 },
+    { x: 2, y: -2 },
+    { x: 3, y: -3 },
+  ]);
+});
