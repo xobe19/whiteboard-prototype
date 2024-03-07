@@ -6,7 +6,7 @@ import { DrawingMode } from "../../redux/types";
 export function subscribeToStore(
   canvasRef: HTMLCanvasElement,
   canvasContext: CanvasRenderingContext2D,
-  drawingModeChangeListener: (newDrawingMode: DrawingMode) => void,
+  drawingModeChangeListener: (newDrawingMode: DrawingMode) => void
 ) {
   let oldDrawingMode = store.getState().canvas.drawingMode;
   let oldCtrlState = false;
@@ -17,13 +17,9 @@ export function subscribeToStore(
       draw(canvasRef, canvasContext, state.canvas);
       store.dispatch(setRendered(true));
     }
-    if(state.canvas.drawingMode != oldDrawingMode) {
+    if (state.canvas.drawingMode != oldDrawingMode) {
       drawingModeChangeListener(state.canvas.drawingMode);
       oldDrawingMode = state.canvas.drawingMode;
     }
-
-    
-    
-    
   });
 }

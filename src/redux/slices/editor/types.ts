@@ -1,13 +1,18 @@
-export interface Point {
-  x: number;
-  y: number;
+export interface RealPoint {
+  realX: number;
+  realY: number;
+}
+
+export interface VirtualPoint {
+  virtualX: number;
+  virtualY: number;
 }
 
 export interface MouseMoveData {
   deltaX: number;
   deltaY: number;
-  x: number;
-  y: number;
+  virtualX: number;
+  virtualY: number;
 }
 
 type solidShapeType = "crcl" | "rect" | "trng";
@@ -17,7 +22,7 @@ export interface SolidShape {
   type: solidShapeType;
   backgroundColor: string;
   backgroundFilled: boolean;
-  shapeTopLeftCoordinates: Point;
+  shapeTopLeftCoordinates: RealPoint;
   width: number;
   height: number;
   noteContents: string;
@@ -26,7 +31,7 @@ export interface SolidShape {
 
 export interface FreeDrawnShape {
   id: string;
-  realPoints: Point[];
+  points: RealPoint[];
   strokeColor: string;
   xAxisInclination: number;
 }
@@ -45,14 +50,28 @@ export interface Toolbox {
 
 export interface Canvas {
   id: string;
-  b: Point;
+  b: RealPoint;
   zoom: number;
   shapes: (SolidShape | FreeDrawnShape)[];
   mode: CanvasMode;
-  toolbox: Toolbox;
+  currFreeDrawPoints: RealPoint[];
+}
+
+export interface KeyState {
   isMouseDown: boolean;
   isRightMouseDown: boolean;
   isCtrlDown: boolean;
-  previousMouseDown?: Point;
-  currFreeDrawPoints: Point[];
+  previousMouseDown?: RealPoint;
+}
+
+export interface Editor {
+  canvas: Canvas;
+  toolbox: Toolbox;
+  keyState: KeyState;
+}
+
+export function isSolidShape(
+  shape: FreeDrawnShape | SolidShape
+): shape is SolidShape {
+  return (shape as any)["points"] === undefined;
 }

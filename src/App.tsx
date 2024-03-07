@@ -2,7 +2,6 @@ import { Provider } from "react-redux";
 import "./App.css";
 import Canvas from "./components/Canvas";
 import store from "./redux/store";
-import { ModeSelector } from "./components/ModeSelector";
 
 function App() {
   return (
@@ -10,8 +9,8 @@ function App() {
       <Provider store={store}>
         <div>
           <Canvas />
-          <ModeSelector/>
-         </div>
+          <ModeSelector />
+        </div>
       </Provider>
     </>
   );

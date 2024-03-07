@@ -1,5 +1,7 @@
+import { useEffect, useRef } from "react";
+import { useDispatch } from "react-redux/es/hooks/useDispatch";
+import { Shape } from "../entities/Shape";
 import useWindowSize from "../hooks/useWindowSize";
-import { useRef, useEffect } from "react";
 import {
   addShape,
   changeScale,
@@ -9,15 +11,13 @@ import {
   selectedMouseMove,
   shiftOriginX,
   shiftOriginY,
-} from "../redux/canvasSlice";
-import { useDispatch } from "react-redux/es/hooks/useDispatch";
-import { subscribeToStore } from "../utils/canvas/subscribeToStore";
-import { drawFreeHandLive } from "../utils/canvas/drawFreeHand";
-import { getMinCoOrdinates } from "../utils/canvas/getMinCoOrdinates";
-import { getMaxCoOrdinates } from "../utils/canvas/getMaxCoOrdinates";
-import { Shape } from "../entities/Shape";
+} from "../redux/slices/canvasSlice";
 import { DrawingMode } from "../redux/types";
+import { drawFreeHandLive } from "../utils/canvas/drawFreeHand";
 import { emptyShapeStateObjectFactory } from "../utils/canvas/emptyShapeObjectFactory";
+import { getMaxCoOrdinates } from "../utils/canvas/getMaxCoOrdinates";
+import { getMinCoOrdinates } from "../utils/canvas/getMinCoOrdinates";
+import { subscribeToStore } from "../utils/canvas/subscribeToStore";
 
 function Canvas() {
   const [height, width] = useWindowSize();
@@ -31,18 +31,17 @@ function Canvas() {
     drawingMode.current = newDrawingMode;
   });
 
-
   useEffect(() => {
     canvasContext.current = canvasRef.current!.getContext("2d");
     subscribeToStore(
       canvasRef.current!,
       canvasContext.current!,
-      drawingModeListenerCallback.current,
+      drawingModeListenerCallback.current
     );
-    window.addEventListener('keydown', () => {
+    window.addEventListener("keydown", () => {
       ctrlPressed.current = true;
     });
-    window.addEventListener('keyup', () => {
+    window.addEventListener("keyup", () => {
       ctrlPressed.current = false;
     });
   }, []);
@@ -115,8 +114,14 @@ function Canvas() {
               evt.clientX - shapeInConstruction.current.x;
             shapeInConstruction.current.height =
               evt.clientY - shapeInConstruction.current.y;
-          } else if(drawingMode.current === "selected") {
-            dispatch(selectedMouseMove({movement: {x: evt.movementX, y: evt.movementY}, point: {x: evt.clientX, y: evt.clientY}, rotate: ctrlPressed.current}));
+          } else if (drawingMode.current === "selected") {
+            dispatch(
+              selectedMouseMove({
+                movement: { x: evt.movementX, y: evt.movementY },
+                point: { x: evt.clientX, y: evt.clientY },
+                rotate: ctrlPressed.current,
+              })
+            );
           }
         }
       }}
@@ -149,7 +154,7 @@ function Canvas() {
               evt.clientX - shapeInConstruction.current.x;
             shapeInConstruction.current.height =
               evt.clientY - shapeInConstruction.current.y;
-          } else if(drawingMode.current === "selected") {
+          } else if (drawingMode.current === "selected") {
             dispatch(mouseMovementEnded());
           }
         }
