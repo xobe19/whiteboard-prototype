@@ -114,3 +114,30 @@ test("testing free drawing", () => {
     expect(true).toBe(false);
   }
 });
+
+test("selecting a shape", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
+
+  let lastShape = store.getState().editor.canvas.shapes.slice(-1)[0];
+  if (isSolidShape(lastShape)) {
+    let pnt = lastShape.shapeTopLeftCoordinates;
+    expect(pnt).toStrictEqual({
+      realX: 200,
+      realY: -200,
+    });
+
+    expect(lastShape.width).toBe(100);
+    expect(lastShape.height).toBe(200);
+  } else {
+    expect(true).toBe(false);
+  }
+
+  let shapeID = lastShape.id;
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
+  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  let lastSelectedShapeID = store.getState().editor.canvas.singleSelectShapeID;
+  expect(lastSelectedShapeID).toBe(shapeID);
+});

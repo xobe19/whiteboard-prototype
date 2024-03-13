@@ -7,7 +7,7 @@ import {
   SolidShape,
   Editor,
 } from "./types";
-import { getRealPoint } from "./utils";
+import { getRealPoint, getSelectedShapeID } from "./utils";
 import { uid } from "uid";
 import { shallowEquals } from "../../../utils/shallowEquals";
 let toID = uid;
@@ -37,6 +37,7 @@ let initialState: Editor = {
     b: { realX: 0, realY: 0 },
 
     currFreeDrawPoints: [],
+    multiSelectShapeID: [],
   },
   keyState: {
     isCtrlDown: false,
@@ -66,11 +67,23 @@ const editorReducer = createReducer(initialState, (builder) => {
         action.payload,
         state.canvas.zoom
       );
-      if (state.canvas.mode === CanvasMode.CreateShape) {
-        //handled below
-      } else if (state.canvas.mode === CanvasMode.FreeDraw) {
-        state.canvas.currFreeDrawPoints = [mdPoint];
+      switch (state.canvas.mode) {
+        case CanvasMode.CreateShape:
+          break;
+        case CanvasMode.FreeDraw:
+          state.canvas.currFreeDrawPoints = [mdPoint];
+          break;
+        case CanvasMode.Default:
+          let selectedShapeID = getSelectedShapeID(
+            mdPoint,
+            state.canvas.shapes
+          );
+          if (selectedShapeID !== "") {
+            state.canvas.mode = CanvasMode.ShapeModify;
+            state.canvas.singleSelectShapeID = selectedShapeID;
+          }
       }
+
       state.keyState.previousMouseDown = mdPoint;
       state.keyState.isMouseDown = true;
     })
