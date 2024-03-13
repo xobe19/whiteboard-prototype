@@ -99,6 +99,7 @@ test("testing free drawing", () => {
   store.dispatch(mouseMove({ virtualX: 2, virtualY: 2, deltaX: 1, deltaY: 1 }));
   store.dispatch(mouseMove({ virtualX: 3, virtualY: 3, deltaX: 1, deltaY: 1 }));
   store.dispatch(mouseUp({ virtualX: 3, virtualY: 3 }));
+  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
   store.dispatch(mouseMove({ virtualX: 4, virtualY: 4, deltaX: 1, deltaY: 1 }));
   let shapes = store.getState().editor.canvas.shapes;
   let recently_inserted_shape = shapes[shapes.length - 1];
@@ -141,3 +142,53 @@ test("selecting a shape", () => {
   let lastSelectedShapeID = store.getState().editor.canvas.singleSelectShapeID;
   expect(lastSelectedShapeID).toBe(shapeID);
 });
+
+test("not selecting a shape", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
+
+  let lastShape = store.getState().editor.canvas.shapes.slice(-1)[0];
+  if (isSolidShape(lastShape)) {
+    let pnt = lastShape.shapeTopLeftCoordinates;
+    expect(pnt).toStrictEqual({
+      realX: 200,
+      realY: -200,
+    });
+
+    expect(lastShape.width).toBe(100);
+    expect(lastShape.height).toBe(200);
+  } else {
+    expect(true).toBe(false);
+  }
+
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 500 }));
+  store.dispatch(mouseUp({ virtualX: 250, virtualY: 500 }));
+  store.dispatch(mouseDown({ virtualX: 100, virtualY: 300 }));
+  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
+});
+
+test("selecting free drawn shape", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.FreeDraw));
+  store.dispatch(mouseMove({ virtualX: 1, virtualY: 1, deltaX: 1, deltaY: 1 }));
+  store.dispatch(mouseDown({ virtualX: 1, virtualY: 1 }));
+  store.dispatch(mouseMove({ virtualX: 2, virtualY: 2, deltaX: 1, deltaY: 1 }));
+  store.dispatch(mouseMove({ virtualX: 3, virtualY: 3, deltaX: 1, deltaY: 1 }));
+  store.dispatch(mouseUp({ virtualX: 3, virtualY: 3 }));
+  store.dispatch(mouseMove({ virtualX: 4, virtualY: 4, deltaX: 1, deltaY: 1 }));
+  let shapes = store.getState().editor.canvas.shapes;
+  let recently_inserted_shape = shapes[shapes.length - 1];
+
+  if (!isSolidShape(recently_inserted_shape)) {
+    console.log(recently_inserted_shape.points);
+    store.dispatch(mouseDown({ virtualX: 1, virtualY: 1.5 }));
+    expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  } else {
+    expect(true).toBe(false);
+  }
+});
+
+test("deselecting shape", () => {});
+
+test("reselecting a single shape", () => {});

@@ -52,7 +52,7 @@ export function isPointInSolidShape(clickedAt: RealPoint, shape: SolidShape) {
 
   return (
     isBetween(topLeft.realX, clickedAt.realX, bottomRight.realX) &&
-    (topLeft.realY, clickedAt.realY, bottomRight.realY)
+    isBetween(bottomRight.realY, clickedAt.realY, topLeft.realY)
   );
 }
 
@@ -70,7 +70,7 @@ export function isPointInFreeShape(
 ) {
   let points = shape.points;
   let x_coordinates = points.map((e) => e.realX);
-  let y_coordinates = points.map((e) => e.realX);
+  let y_coordinates = points.map((e) => e.realY);
   let x1 = Math.min(...x_coordinates);
   let x2 = Math.max(...x_coordinates);
   let y1 = Math.max(...y_coordinates);
