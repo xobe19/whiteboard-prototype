@@ -189,6 +189,28 @@ test("selecting free drawn shape", () => {
   }
 });
 
-test("deselecting shape", () => {});
+test("deselecting shape", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
 
-test("reselecting a single shape", () => {});
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
+  store.dispatch(mouseDown({ virtualX: 100, virtualY: 100 }));
+  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
+  expect(store.getState().editor.canvas.singleSelectShapeID).toBe("");
+});
+
+test("reselecting a single shape", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 400, virtualY: 350 }));
+  store.dispatch(mouseUp({ virtualX: 500, virtualY: 500 }));
+  store.dispatch(mouseDown({ virtualX: 450, virtualY: 400 }));
+
+  let lastShape = store.getState().editor.canvas.shapes.slice(-1)[0];
+  expect(lastShape.id).toBe(store.getState().editor.canvas.singleSelectShapeID);
+});

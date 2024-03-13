@@ -15,6 +15,17 @@ export interface MouseMoveData {
   virtualY: number;
 }
 
+export enum ShapeModifier {
+  tl,
+  tc,
+  tr,
+  cl,
+  cr,
+  bl,
+  bc,
+  br,
+}
+
 type solidShapeType = "crcl" | "rect" | "trng";
 
 export interface SolidShape {

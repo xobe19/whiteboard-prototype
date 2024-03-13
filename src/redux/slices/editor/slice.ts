@@ -73,7 +73,7 @@ const editorReducer = createReducer(initialState, (builder) => {
         case CanvasMode.FreeDraw:
           state.canvas.currFreeDrawPoints = [mdPoint];
           break;
-        case CanvasMode.Default:
+        case CanvasMode.Default: {
           let selectedShapeID = getSelectedShapeID(
             mdPoint,
             state.canvas.shapes
@@ -82,6 +82,19 @@ const editorReducer = createReducer(initialState, (builder) => {
             state.canvas.mode = CanvasMode.ShapeModify;
             state.canvas.singleSelectShapeID = selectedShapeID;
           }
+          break;
+        }
+        case CanvasMode.ShapeModify: {
+          let selectedShapeID = getSelectedShapeID(
+            mdPoint,
+            state.canvas.shapes
+          );
+          if (selectedShapeID === "") {
+            state.canvas.mode = CanvasMode.Default;
+          }
+          state.canvas.singleSelectShapeID = selectedShapeID;
+          break;
+        }
       }
 
       state.keyState.previousMouseDown = mdPoint;
