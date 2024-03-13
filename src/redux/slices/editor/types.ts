@@ -22,11 +22,6 @@ export enum ShapeModifierLocation {
   br,
 }
 
-export interface ShapeModifierClickPayload {
-  clickLocation: ShapeModifierLocation;
-  shapeID: string;
-}
-
 type solidShapeType = "crcl" | "rect" | "trng";
 
 export interface SolidShape {

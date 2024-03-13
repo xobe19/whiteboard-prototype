@@ -1,5 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { CanvasMode, isSolidShape } from "../redux/slices/editor/types";
+import {
+  CanvasMode,
+  ShapeModifierLocation,
+  SolidShape,
+  isSolidShape,
+} from "../redux/slices/editor/types";
 import {
   mouseDown,
   mouseUp,
@@ -9,6 +14,7 @@ import {
   rightMouseDown,
   rightMouseUp,
   editorReducer,
+  shapeModifierClick,
 } from "../redux/slices/editor/slice";
 let store = configureStore({
   reducer: { editor: editorReducer },
@@ -166,6 +172,7 @@ test("not selecting a shape", () => {
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 500 }));
   store.dispatch(mouseUp({ virtualX: 250, virtualY: 500 }));
   store.dispatch(mouseDown({ virtualX: 100, virtualY: 300 }));
+  store.dispatch(mouseUp({ virtualX: 100, virtualY: 300 }));
   expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
 });
 
@@ -181,8 +188,8 @@ test("selecting free drawn shape", () => {
   let recently_inserted_shape = shapes[shapes.length - 1];
 
   if (!isSolidShape(recently_inserted_shape)) {
-    console.log(recently_inserted_shape.points);
     store.dispatch(mouseDown({ virtualX: 1, virtualY: 1.5 }));
+    store.dispatch(mouseUp({ virtualX: 1, virtualY: 1.5 }));
     expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
   } else {
     expect(true).toBe(false);
@@ -195,7 +202,9 @@ test("deselecting shape", () => {
   store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
 
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
+  store.dispatch(mouseUp({ virtualX: 250, virtualY: 300 }));
   store.dispatch(mouseDown({ virtualX: 100, virtualY: 100 }));
+  store.dispatch(mouseUp({ virtualX: 100, virtualY: 100 }));
   expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
   expect(store.getState().editor.canvas.singleSelectShapeID).toBe("");
 });
@@ -206,6 +215,8 @@ test("reselecting a single shape", () => {
   store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
 
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
+  store.dispatch(mouseUp({ virtualX: 250, virtualY: 300 }));
+
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ virtualX: 400, virtualY: 350 }));
   store.dispatch(mouseUp({ virtualX: 500, virtualY: 500 }));
@@ -213,4 +224,58 @@ test("reselecting a single shape", () => {
 
   let lastShape = store.getState().editor.canvas.shapes.slice(-1)[0];
   expect(lastShape.id).toBe(store.getState().editor.canvas.singleSelectShapeID);
+});
+
+test("resizing shape", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
+  store.dispatch(mouseUp({ virtualX: 250, virtualY: 300 }));
+
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 400, virtualY: 350 }));
+  store.dispatch(mouseUp({ virtualX: 500, virtualY: 500 }));
+  store.dispatch(mouseDown({ virtualX: 450, virtualY: 400 }));
+
+  //expanding top left co-ordinate
+  store.dispatch(shapeModifierClick(ShapeModifierLocation.tl));
+  store.dispatch(
+    mouseMove({ virtualX: 300, virtualY: 300, deltaX: -300, deltaY: -50 })
+  );
+
+  //expanding top right co-ordinate
+  store.dispatch(shapeModifierClick(ShapeModifierLocation.tr));
+  store.dispatch(
+    mouseMove({ virtualX: 200, virtualY: 600, deltaX: 0, deltaY: 0 })
+  );
+
+  //expanding bottom left co-ordinate
+  store.dispatch(shapeModifierClick(ShapeModifierLocation.bl));
+  store.dispatch(
+    mouseMove({ virtualX: 100, virtualY: 800, deltaX: 0, deltaY: 0 })
+  );
+  expect(
+    (store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape)
+      .shapeTopLeftCoordinates
+  ).toStrictEqual({
+    realX: 100,
+    realY: -500,
+  });
+  expect(
+    (store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape).width
+  ).toBe(200);
+
+  expect(
+    (store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape).height
+  ).toBe(300);
+  //expanding bottom right co-ordinate
+  store.dispatch(mouseDown({ virtualX: 400, virtualY: 350 }));
+  store.dispatch(shapeModifierClick(ShapeModifierLocation.tl));
+  store.dispatch(
+    mouseMove({ virtualX: 300, virtualY: 300, deltaX: -300, deltaY: -50 })
+  );
+
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 300 }));
 });

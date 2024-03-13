@@ -6,7 +6,6 @@ import {
   VirtualPoint,
   SolidShape,
   Editor,
-  ShapeModifierClickPayload,
   ShapeModifierLocation,
   isSolidShape,
 } from "./types";
@@ -267,4 +266,5 @@ export {
   mouseMove,
   rightMouseUp,
   rightMouseDown,
+  shapeModifierClick,
 };
