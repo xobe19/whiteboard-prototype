@@ -6,6 +6,9 @@ import {
   VirtualPoint,
   SolidShape,
   Editor,
+  ShapeModifierClickPayload,
+  ShapeModifierLocation,
+  isSolidShape,
 } from "./types";
 import { getRealPoint, getSelectedShapeID } from "./utils";
 import { uid } from "uid";
@@ -54,6 +57,9 @@ let mouseUp = createAction<VirtualPoint>("canvas/mouseUp");
 let mouseMove = createAction<MouseMoveData>("canvas/mouseMove");
 let changeCanvasMode = createAction<CanvasMode>("canvas/changeCanvasMode");
 let zoomCanvas = createAction<number>("canvas/zoomCanvas");
+let shapeModifierClick = createAction<ShapeModifierLocation>(
+  "canvas/shapeModifierClick"
+);
 
 // -------- REDUCER ----------
 
@@ -145,6 +151,8 @@ const editorReducer = createReducer(initialState, (builder) => {
         };
         state.canvas.shapes.push(newShape);
         state.canvas.mode = CanvasMode.Default;
+      } else if (state.canvas.mode === CanvasMode.ShapeModify) {
+        state.canvas.activeShapeModifierLocation = undefined;
       }
       state.keyState.isMouseDown = false;
     })
@@ -178,11 +186,75 @@ const editorReducer = createReducer(initialState, (builder) => {
           realX: pnt.realX,
           realY: pnt.realY,
         });
+      } else if (
+        state.canvas.mode === CanvasMode.ShapeModify &&
+        state.keyState.isMouseDown &&
+        state.canvas.activeShapeModifierLocation !== undefined
+      ) {
+        let selectedShape = state.canvas.shapes.find(
+          (shape) => shape.id === state.canvas.singleSelectShapeID
+        );
+        if (selectedShape === undefined) {
+          throw new Error("shape not found, shouldn't occur");
+        }
+        if (isSolidShape(selectedShape)) {
+          let point1;
+          let point2;
+          switch (state.canvas.activeShapeModifierLocation) {
+            case ShapeModifierLocation.tl: {
+              point1 = pnt;
+              point2 = {
+                realX:
+                  selectedShape.shapeTopLeftCoordinates.realX +
+                  selectedShape.width,
+                realY:
+                  selectedShape.shapeTopLeftCoordinates.realY -
+                  selectedShape.height,
+              };
+              break;
+            }
+            case ShapeModifierLocation.br: {
+              point1 = pnt;
+              point2 = selectedShape.shapeTopLeftCoordinates;
+              break;
+            }
+            case ShapeModifierLocation.bl: {
+              point1 = pnt;
+              point2 = {
+                realX:
+                  selectedShape.shapeTopLeftCoordinates.realX +
+                  selectedShape.width,
+                realY: selectedShape.shapeTopLeftCoordinates.realY,
+              };
+              break;
+            }
+            case ShapeModifierLocation.tr: {
+              point1 = pnt;
+              point2 = {
+                realX: selectedShape.shapeTopLeftCoordinates.realX,
+                realY:
+                  selectedShape.shapeTopLeftCoordinates.realY -
+                  selectedShape.height,
+              };
+            }
+          }
+
+          selectedShape.width = Math.abs(point2.realX - point1.realX);
+          selectedShape.height = Math.abs(point2.realY - point1.realY);
+          selectedShape.shapeTopLeftCoordinates = {
+            realX: Math.min(point1.realX, point2.realX),
+            realY: Math.max(point1.realY, point2.realY),
+          };
+        }
       }
     })
     .addCase(zoomCanvas, (state, action) => {
       let delta = action.payload;
       state.canvas.zoom += delta;
+    })
+    .addCase(shapeModifierClick, (state, action) => {
+      let clickedLocation = action.payload;
+      state.canvas.activeShapeModifierLocation = clickedLocation;
     });
 });
 

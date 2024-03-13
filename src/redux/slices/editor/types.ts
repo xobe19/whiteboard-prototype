@@ -15,15 +15,16 @@ export interface MouseMoveData {
   virtualY: number;
 }
 
-export enum ShapeModifier {
+export enum ShapeModifierLocation {
   tl,
-  tc,
   tr,
-  cl,
-  cr,
   bl,
-  bc,
   br,
+}
+
+export interface ShapeModifierClickPayload {
+  clickLocation: ShapeModifierLocation;
+  shapeID: string;
 }
 
 type solidShapeType = "crcl" | "rect" | "trng";
@@ -68,6 +69,7 @@ export interface Canvas {
   currFreeDrawPoints: RealPoint[];
   multiSelectShapeID: string[];
   singleSelectShapeID?: string;
+  activeShapeModifierLocation?: ShapeModifierLocation;
 }
 
 export interface KeyState {
