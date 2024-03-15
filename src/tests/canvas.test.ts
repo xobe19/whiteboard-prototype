@@ -16,6 +16,7 @@ import {
   editorReducer,
   shapeModifierClick,
 } from "../redux/slices/editor/slice";
+import { rotateCoordinates } from "../redux/slices/editor/utils";
 let store = configureStore({
   reducer: { editor: editorReducer },
 });
@@ -270,12 +271,34 @@ test("resizing shape", () => {
   expect(
     (store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape).height
   ).toBe(300);
-  //expanding bottom right co-ordinate
-  store.dispatch(mouseDown({ virtualX: 400, virtualY: 350 }));
-  store.dispatch(shapeModifierClick(ShapeModifierLocation.tl));
-  store.dispatch(
-    mouseMove({ virtualX: 300, virtualY: 300, deltaX: -300, deltaY: -50 })
-  );
+});
 
-  store.dispatch(mouseUp({ virtualX: 300, virtualY: 300 }));
+test("rotation function & direction", () => {
+  let rotated = rotateCoordinates(
+    { realX: 0, realY: 0 },
+    { realX: 1, realY: 1 },
+    Math.PI / 4,
+    true
+  );
+  expect(rotated.realX).toBeCloseTo(Math.sqrt(2));
+  expect(rotated.realY).toBeCloseTo(0);
+
+  let rotated2 = rotateCoordinates(
+    { realX: 0, realY: 0 },
+    { realX: 1, realY: 1 },
+    Math.PI / 4,
+    false
+  );
+  expect(rotated2.realX).toBeCloseTo(0);
+  expect(rotated2.realY).toBeCloseTo(Math.sqrt(2));
+});
+
+test("rotate shape", () => {
+  // 1. creating shape
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+  // 2. Selecting that shape
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
+  store.dispatch(mouseUp({ virtualX: 250, virtualY: 300 }));
 });

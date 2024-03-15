@@ -44,6 +44,8 @@ export function isBetween(a: number, b: number, c: number) {
 }
 
 export function isPointInSolidShape(clickedAt: RealPoint, shape: SolidShape) {
+  //rotate pnt in clockwise direction by xAxisInclination
+
   let topLeft = shape.shapeTopLeftCoordinates;
   let bottomRight = {
     realX: topLeft.realX + shape.width,
@@ -97,4 +99,24 @@ export function getSelectedShapeID(
     }
   }
   return "";
+}
+
+export function rotateCoordinates(
+  rotateAbout: RealPoint,
+  rotatingPoint: RealPoint,
+  rad: number,
+  clockwise: boolean
+) {
+  let s = Math.sin(clockwise ? -rad : rad);
+  let c = Math.cos(clockwise ? -rad : rad);
+
+  let point = { realX: rotatingPoint.realX, realY: rotatingPoint.realY };
+
+  point.realX -= rotateAbout.realX;
+  point.realY -= rotateAbout.realY;
+
+  let xnew = point.realX * c - point.realY * s;
+  let ynew = point.realX * s + point.realY * c;
+
+  return { realX: xnew + rotateAbout.realX, realY: ynew + rotateAbout.realY };
 }
