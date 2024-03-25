@@ -15,6 +15,7 @@ import {
   rightMouseUp,
   editorReducer,
   shapeModifierClick,
+  rotateShapeTextFieldEnter,
 } from "../redux/slices/editor/slice";
 import { rotateCoordinates } from "../redux/slices/editor/utils";
 let store = configureStore({
@@ -121,6 +122,9 @@ test("testing free drawing", () => {
   } else {
     expect(true).toBe(false);
   }
+
+  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
+  expect(store.getState().editor.canvas.currFreeDrawPoints.length).toBe(0);
 });
 
 test("selecting a shape", () => {
@@ -298,7 +302,23 @@ test("rotate shape", () => {
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
   store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+
   // 2. Selecting that shape
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
   store.dispatch(mouseUp({ virtualX: 250, virtualY: 300 }));
+
+  //3. passing value to rotate field
+  store.dispatch(rotateShapeTextFieldEnter(45));
+
+  let selectedShapeID = store.getState().editor.canvas.singleSelectShapeID;
+
+  let selectedShape = store
+    .getState()
+    .editor.canvas.shapes.find((shape) => shape.id === selectedShapeID);
+
+  if (selectedShape !== undefined) {
+    expect(selectedShape.xAxisInclination).toBeCloseTo(Math.PI / 4);
+  } else {
+    expect(true).toBe(false);
+  }
 });

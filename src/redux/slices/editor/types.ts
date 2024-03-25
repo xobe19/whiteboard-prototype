@@ -62,7 +62,6 @@ export interface Canvas {
   shapes: (SolidShape | FreeDrawnShape)[];
   mode: CanvasMode;
   currFreeDrawPoints: RealPoint[];
-  multiSelectShapeID: string[];
   singleSelectShapeID?: string;
   activeShapeModifierLocation?: ShapeModifierLocation;
 }

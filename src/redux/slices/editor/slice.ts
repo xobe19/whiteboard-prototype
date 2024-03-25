@@ -39,7 +39,6 @@ let initialState: Editor = {
     b: { realX: 0, realY: 0 },
 
     currFreeDrawPoints: [],
-    multiSelectShapeID: [],
   },
   keyState: {
     isCtrlDown: false,
@@ -58,6 +57,10 @@ let changeCanvasMode = createAction<CanvasMode>("canvas/changeCanvasMode");
 let zoomCanvas = createAction<number>("canvas/zoomCanvas");
 let shapeModifierClick = createAction<ShapeModifierLocation>(
   "canvas/shapeModifierClick"
+);
+// the payload is angle in degrees
+let rotateShapeTextFieldEnter = createAction<number>(
+  "canvas/rotateShapeTextFieldEnter"
 );
 
 // -------- REDUCER ----------
@@ -150,6 +153,7 @@ const editorReducer = createReducer(initialState, (builder) => {
         };
         state.canvas.shapes.push(newShape);
         state.canvas.mode = CanvasMode.Default;
+        state.canvas.currFreeDrawPoints = [];
       } else if (state.canvas.mode === CanvasMode.ShapeModify) {
         state.canvas.activeShapeModifierLocation = undefined;
       }
@@ -254,6 +258,21 @@ const editorReducer = createReducer(initialState, (builder) => {
     .addCase(shapeModifierClick, (state, action) => {
       let clickedLocation = action.payload;
       state.canvas.activeShapeModifierLocation = clickedLocation;
+    })
+    .addCase(rotateShapeTextFieldEnter, (state, action) => {
+      let selectedShape = state.canvas.shapes.find(
+        (e) => e.id === state.canvas.singleSelectShapeID
+      );
+
+      if (selectedShape === undefined) {
+        throw new Error("didn't find any shape selected, shouldn't occur");
+      }
+
+      let newAngleInDegrees = action.payload;
+
+      let newAngleInRadians = (Math.PI * newAngleInDegrees) / 180;
+
+      selectedShape.xAxisInclination = newAngleInRadians;
     });
 });
 
@@ -267,4 +286,5 @@ export {
   rightMouseUp,
   rightMouseDown,
   shapeModifierClick,
+  rotateShapeTextFieldEnter,
 };
