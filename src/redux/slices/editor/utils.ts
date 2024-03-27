@@ -47,14 +47,22 @@ export function isPointInSolidShape(clickedAt: RealPoint, shape: SolidShape) {
   //rotate pnt in clockwise direction by xAxisInclination
 
   let topLeft = shape.shapeTopLeftCoordinates;
+
+  let rotatedClickedAt = rotateCoordinates(
+    topLeft,
+    clickedAt,
+    shape.xAxisInclination,
+    true
+  );
+
   let bottomRight = {
     realX: topLeft.realX + shape.width,
     realY: topLeft.realY - shape.height,
   };
 
   return (
-    isBetween(topLeft.realX, clickedAt.realX, bottomRight.realX) &&
-    isBetween(bottomRight.realY, clickedAt.realY, topLeft.realY)
+    isBetween(topLeft.realX, rotatedClickedAt.realX, bottomRight.realX) &&
+    isBetween(bottomRight.realY, rotatedClickedAt.realY, topLeft.realY)
   );
 }
 

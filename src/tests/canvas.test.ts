@@ -398,10 +398,10 @@ test("checking if a rotated solid shape is selected", () => {
   store.dispatch(mouseUp({ virtualX: 250, virtualY: 250 }));
   store.dispatch(rotateShapeTextFieldEnter(60));
 
-  store.dispatch(mouseDown({ virtualX: 50, virtualY: 300 }));
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 150 }));
 
   expect(
-    store.getState().editor.canvas.activeShapeModifierLocation
+    store.getState().editor.canvas.singleSelectShapeID
   ).not.toBeUndefined();
 });
 
