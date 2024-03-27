@@ -402,7 +402,7 @@ test("checking if a rotated solid shape is selected", () => {
 
   expect(
     store.getState().editor.canvas.activeShapeModifierLocation
-  ).toBeTruthy();
+  ).not.toBeUndefined();
 });
 
 test("checking if a rotated free shape is selected", () => {});
