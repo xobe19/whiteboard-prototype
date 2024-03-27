@@ -8,10 +8,12 @@ import {
   Editor,
   ShapeModifierLocation,
   isSolidShape,
+  RealPoint,
 } from "./types";
 import { getRealPoint, getSelectedShapeID } from "./utils";
 import { uid } from "uid";
 import { shallowEquals } from "../../../utils/shallowEquals";
+import { WritableDraft } from "immer/dist/internal.js";
 let toID = uid;
 let sampleShape1: SolidShape = {
   backgroundColor: "blue",
@@ -200,54 +202,96 @@ const editorReducer = createReducer(initialState, (builder) => {
         if (selectedShape === undefined) {
           throw new Error("shape not found, shouldn't occur");
         }
-        if (isSolidShape(selectedShape)) {
-          let point1;
-          let point2;
-          switch (state.canvas.activeShapeModifierLocation) {
-            case ShapeModifierLocation.tl: {
-              point1 = pnt;
-              point2 = {
-                realX:
-                  selectedShape.shapeTopLeftCoordinates.realX +
-                  selectedShape.width,
-                realY:
-                  selectedShape.shapeTopLeftCoordinates.realY -
-                  selectedShape.height,
-              };
-              break;
-            }
-            case ShapeModifierLocation.br: {
-              point1 = pnt;
-              point2 = selectedShape.shapeTopLeftCoordinates;
-              break;
-            }
-            case ShapeModifierLocation.bl: {
-              point1 = pnt;
-              point2 = {
-                realX:
-                  selectedShape.shapeTopLeftCoordinates.realX +
-                  selectedShape.width,
-                realY: selectedShape.shapeTopLeftCoordinates.realY,
-              };
-              break;
-            }
-            case ShapeModifierLocation.tr: {
-              point1 = pnt;
-              point2 = {
-                realX: selectedShape.shapeTopLeftCoordinates.realX,
-                realY:
-                  selectedShape.shapeTopLeftCoordinates.realY -
-                  selectedShape.height,
-              };
-            }
-          }
 
-          selectedShape.width = Math.abs(point2.realX - point1.realX);
-          selectedShape.height = Math.abs(point2.realY - point1.realY);
-          selectedShape.shapeTopLeftCoordinates = {
-            realX: Math.min(point1.realX, point2.realX),
-            realY: Math.max(point1.realY, point2.realY),
+        let oldTopLeftPoint: WritableDraft<RealPoint>;
+        let oldWidth: number;
+        let oldHeight: number;
+        if (isSolidShape(selectedShape)) {
+          oldTopLeftPoint = selectedShape.shapeTopLeftCoordinates;
+          oldHeight = selectedShape.height;
+          oldWidth = selectedShape.width;
+        } else {
+          oldTopLeftPoint = {
+            realX: Math.min(
+              ...selectedShape.points.map((point) => point.realX)
+            ),
+            realY: Math.max(
+              ...selectedShape.points.map((point) => point.realY)
+            ),
           };
+
+          let oldXs = selectedShape.points.map((point) => point.realX);
+          let oldYs = selectedShape.points.map((point) => point.realY);
+
+          oldWidth = Math.max(...oldXs) - Math.min(...oldXs);
+          oldHeight = Math.max(...oldYs) - Math.min(...oldYs);
+        }
+        let point1;
+        let point2;
+        switch (state.canvas.activeShapeModifierLocation) {
+          case ShapeModifierLocation.tl: {
+            point1 = pnt;
+            point2 = {
+              realX: oldTopLeftPoint.realX + oldWidth,
+              realY: oldTopLeftPoint.realY - oldHeight,
+            };
+            break;
+          }
+          case ShapeModifierLocation.br: {
+            point1 = pnt;
+            point2 = oldTopLeftPoint;
+            break;
+          }
+          case ShapeModifierLocation.bl: {
+            point1 = pnt;
+            point2 = {
+              realX: oldTopLeftPoint.realX + oldWidth,
+              realY: oldTopLeftPoint.realY,
+            };
+            break;
+          }
+          case ShapeModifierLocation.tr: {
+            point1 = pnt;
+            point2 = {
+              realX: oldTopLeftPoint.realX,
+              realY: oldTopLeftPoint.realY - oldHeight,
+            };
+          }
+        }
+
+        const newWidth = Math.abs(point2.realX - point1.realX);
+        const newHeight = Math.abs(point2.realY - point1.realY);
+        const newTopLeftCoordinates = {
+          realX: Math.min(point1.realX, point2.realX),
+          realY: Math.max(point1.realY, point2.realY),
+        };
+
+        if (isSolidShape(selectedShape)) {
+          selectedShape.width = newWidth;
+          selectedShape.height = newHeight;
+          selectedShape.shapeTopLeftCoordinates = newTopLeftCoordinates;
+        } else {
+          // co-ordinates relative to the top left point(just subtracting) before the shape was modified
+
+          let oldDistancesFromTopLeft = selectedShape.points.map((point) => ({
+            xDist: -oldTopLeftPoint.realX + point.realX,
+            yDist: -point.realY + oldTopLeftPoint.realY,
+          }));
+
+          let xMultiplier = newWidth / oldWidth;
+          let yMultiplier = newHeight / oldHeight;
+
+          let newDistancesFromTopLeft = oldDistancesFromTopLeft.map((dist) => ({
+            xDist: dist.xDist * xMultiplier,
+            yDist: dist.yDist * yMultiplier,
+          }));
+
+          let newPoints = newDistancesFromTopLeft.map((dist) => ({
+            realX: newTopLeftCoordinates.realX + dist.xDist,
+            realY: newTopLeftCoordinates.realY - dist.yDist,
+          }));
+
+          selectedShape.points = newPoints;
         }
       }
     })

@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import {
   CanvasMode,
+  FreeDrawnShape,
   ShapeModifierLocation,
   SolidShape,
   isSolidShape,
@@ -102,7 +103,7 @@ test("adding shapes while zoomed in", () => {
 
 test("testing free drawing", () => {
   store.dispatch(changeCanvasMode(CanvasMode.FreeDraw));
-  store.dispatch(mouseMove({ virtualX: 1, virtualY: 1, deltaX: 1, deltaY: 1 }));
+  store.dispatch(mouseMove({ virtualX: 0, virtualY: 0, deltaX: 0, deltaY: 0 }));
   store.dispatch(mouseDown({ virtualX: 1, virtualY: 1 }));
   store.dispatch(mouseMove({ virtualX: 2, virtualY: 2, deltaX: 1, deltaY: 1 }));
   store.dispatch(mouseMove({ virtualX: 3, virtualY: 3, deltaX: 1, deltaY: 1 }));
@@ -322,3 +323,86 @@ test("rotate shape", () => {
     expect(true).toBe(false);
   }
 });
+
+test("free drawing panning", () => {
+  let fakeDelta = { deltaX: 0, deltaY: 0 };
+  store.dispatch(changeCanvasMode(CanvasMode.FreeDraw));
+  store.dispatch(mouseDown({ virtualX: 1, virtualY: 1 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 2, virtualY: 2 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 3, virtualY: 3 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 4, virtualY: 4 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 5, virtualY: 5 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 6, virtualY: 3.5 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 7, virtualY: 2 }));
+  store.dispatch(mouseUp({ virtualX: 7, virtualY: 2 }));
+
+  store.dispatch(rightMouseDown());
+  store.dispatch(
+    mouseMove({ virtualX: 6, virtualY: 1, deltaX: -1, deltaY: -1 })
+  );
+  expect(store.getState().editor.canvas.b).toStrictEqual({
+    realX: 1,
+    realY: -1,
+  });
+
+  store.dispatch(mouseDown({ virtualX: 6.5, virtualY: 4.5 }));
+  expect(store.getState().editor.canvas.singleSelectShapeID).toBeFalsy();
+
+  store.dispatch(mouseDown({ virtualX: 0.5, virtualY: 0.5 }));
+  expect(store.getState().editor.canvas.singleSelectShapeID).toBeTruthy();
+
+  //shape is selected now
+});
+
+test("free drawing resizing", () => {
+  let fakeDelta = { deltaX: 0, deltaY: 0 };
+  store.dispatch(changeCanvasMode(CanvasMode.FreeDraw));
+  store.dispatch(mouseDown({ virtualX: 1, virtualY: 1 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 2, virtualY: 2 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 3, virtualY: 3 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 4, virtualY: 4 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 5, virtualY: 5 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 6, virtualY: 3.5 }));
+  store.dispatch(mouseMove({ ...fakeDelta, virtualX: 7, virtualY: 2 }));
+  store.dispatch(mouseUp({ virtualX: 7, virtualY: 2 }));
+
+  store.dispatch(mouseDown({ virtualX: 3, virtualY: 5 }));
+  expect(store.getState().editor.canvas.singleSelectShapeID).toBeTruthy();
+  //shape is selected now
+
+  store.dispatch(shapeModifierClick(ShapeModifierLocation.tl));
+  store.dispatch(mouseMove({ virtualX: 0, virtualY: 1, deltaX: 0, deltaY: 0 }));
+  store.dispatch(mouseUp({ virtualX: 0, virtualY: 1 }));
+  let new_points = (
+    store.getState().editor.canvas.shapes.slice(-1)[0] as FreeDrawnShape
+  ).points;
+
+  expect(new_points).toStrictEqual([
+    { realX: 0, realY: -1 },
+    { realX: 1.1666666666666667, realY: -2 },
+    { realX: 2.3333333333333335, realY: -3 },
+    { realX: 3.5, realY: -4 },
+    { realX: 4.666666666666667, realY: -5 },
+    { realX: 5.833333333333334, realY: -3.5 },
+    { realX: 7, realY: -2 },
+  ]);
+});
+
+test("checking if a rotated solid shape is selected", () => {
+  //creating the shape
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+  //selecting the shape to rotate it
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 250 }));
+  store.dispatch(mouseUp({ virtualX: 250, virtualY: 250 }));
+  store.dispatch(rotateShapeTextFieldEnter(60));
+
+  store.dispatch(mouseDown({ virtualX: 50, virtualY: 300 }));
+
+  expect(
+    store.getState().editor.canvas.activeShapeModifierLocation
+  ).toBeTruthy();
+});
+
+test("checking if a rotated free shape is selected", () => {});
