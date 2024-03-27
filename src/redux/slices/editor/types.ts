@@ -79,6 +79,11 @@ export interface Editor {
   keyState: KeyState;
 }
 
+export type Line = {
+  m: number;
+  c: number;
+};
+
 export function isSolidShape(
   shape: FreeDrawnShape | SolidShape
 ): shape is SolidShape {

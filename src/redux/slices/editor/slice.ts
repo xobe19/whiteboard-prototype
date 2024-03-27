@@ -10,7 +10,7 @@ import {
   isSolidShape,
   RealPoint,
 } from "./types";
-import { getRealPoint, getSelectedShapeID } from "./utils";
+import { getRealPoint, getSelectedShapeID, rotateCoordinates } from "./utils";
 import { uid } from "uid";
 import { shallowEquals } from "../../../utils/shallowEquals";
 import { WritableDraft } from "immer/dist/internal.js";
@@ -228,9 +228,15 @@ const editorReducer = createReducer(initialState, (builder) => {
         }
         let point1;
         let point2;
+        let rotatedPnt = rotateCoordinates(
+          oldTopLeftPoint,
+          pnt,
+          selectedShape.xAxisInclination,
+          true
+        );
         switch (state.canvas.activeShapeModifierLocation) {
           case ShapeModifierLocation.tl: {
-            point1 = pnt;
+            point1 = rotatedPnt;
             point2 = {
               realX: oldTopLeftPoint.realX + oldWidth,
               realY: oldTopLeftPoint.realY - oldHeight,
@@ -238,12 +244,12 @@ const editorReducer = createReducer(initialState, (builder) => {
             break;
           }
           case ShapeModifierLocation.br: {
-            point1 = pnt;
+            point1 = rotatedPnt;
             point2 = oldTopLeftPoint;
             break;
           }
           case ShapeModifierLocation.bl: {
-            point1 = pnt;
+            point1 = rotatedPnt;
             point2 = {
               realX: oldTopLeftPoint.realX + oldWidth,
               realY: oldTopLeftPoint.realY,
@@ -251,7 +257,7 @@ const editorReducer = createReducer(initialState, (builder) => {
             break;
           }
           case ShapeModifierLocation.tr: {
-            point1 = pnt;
+            point1 = rotatedPnt;
             point2 = {
               realX: oldTopLeftPoint.realX,
               realY: oldTopLeftPoint.realY - oldHeight,

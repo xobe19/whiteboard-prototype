@@ -18,7 +18,11 @@ import {
   shapeModifierClick,
   rotateShapeTextFieldEnter,
 } from "../redux/slices/editor/slice";
-import { rotateCoordinates } from "../redux/slices/editor/utils";
+import {
+  getNewBoundaryPoints,
+  getRotatedBoundaryPoints,
+  rotateCoordinates,
+} from "../redux/slices/editor/utils";
 let store = configureStore({
   reducer: { editor: editorReducer },
 });
@@ -405,4 +409,46 @@ test("checking if a rotated solid shape is selected", () => {
   ).not.toBeUndefined();
 });
 
-test("checking if a rotated free shape is selected", () => {});
+test("rotated boundary points function", () => {
+  let points = getRotatedBoundaryPoints(
+    { realX: 1, realY: -2 },
+    3,
+    5,
+    Math.PI / 3
+  );
+
+  expect(points).toStrictEqual([
+    { realX: 1, realY: -2 },
+    { realX: 2.5000000000000004, realY: 0.598076211353316 },
+    { realX: 5.330127018922193, realY: -4.5 },
+    { realX: 6.830127018922193, realY: -1.9019237886466844 },
+  ]);
+});
+
+test("resizing rotated fn", () => {
+  let points = getNewBoundaryPoints(
+    getRotatedBoundaryPoints({ realX: 1, realY: -2 }, 3, 5, Math.PI / 3),
+    ShapeModifierLocation.tr,
+    { realX: 4, realY: -1 }
+  );
+
+  expect(points).toStrictEqual([
+    { realX: 4, realY: -1 },
+    { realX: 5.330127018922193, realY: -4.5 },
+    { realX: 2.81698729810778, realY: -3.049038105676659 },
+    { realX: 6.5131397208144115, realY: -2.4509618943233416 },
+  ]);
+});
+
+test("resizing a rotated solid shape", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 1, virtualY: 2 }));
+  store.dispatch(mouseUp({ virtualX: 4, virtualY: 7 }));
+  //selecting the shape to rotate it
+  store.dispatch(mouseDown({ virtualX: 3, virtualY: 4 }));
+  store.dispatch(rotateShapeTextFieldEnter(45));
+
+  store.dispatch(shapeModifierClick(ShapeModifierLocation.tr));
+  store.dispatch(mouseMove({ virtualX: 4, virtualY: 1, deltaX: 0, deltaY: 0 }));
+  console.log(store.getState().editor.canvas.shapes.slice(-1)[0]);
+});
