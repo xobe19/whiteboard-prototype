@@ -108,8 +108,14 @@ const editorReducer = createReducer(initialState, (builder) => {
           );
           if (selectedShapeID === "") {
             state.canvas.mode = CanvasMode.Default;
+          } else if (selectedShapeID === state.canvas.singleSelectShapeID) {
+            // dragging the shape
+            state.canvas.activeShapeModifierLocation =
+              ShapeModifierLocation.inside;
           }
+
           state.canvas.singleSelectShapeID = selectedShapeID;
+
           break;
         }
       }
@@ -201,7 +207,9 @@ const editorReducer = createReducer(initialState, (builder) => {
       } else if (
         state.canvas.mode === CanvasMode.ShapeModify &&
         state.keyState.isMouseDown &&
-        state.canvas.activeShapeModifierLocation !== undefined
+        state.canvas.activeShapeModifierLocation !== undefined &&
+        state.canvas.activeShapeModifierLocation !==
+          ShapeModifierLocation.inside
       ) {
         let selectedShape = state.canvas.shapes.find(
           (shape) => shape.id === state.canvas.singleSelectShapeID
@@ -335,6 +343,29 @@ const editorReducer = createReducer(initialState, (builder) => {
           }));
 
           selectedShape.points = newPoints;
+        }
+      } else if (
+        state.canvas.mode === CanvasMode.ShapeModify &&
+        state.keyState.isMouseDown &&
+        state.canvas.activeShapeModifierLocation ===
+          ShapeModifierLocation.inside
+      ) {
+        let selectedShape = state.canvas.shapes.find(
+          (shape) => shape.id === state.canvas.singleSelectShapeID
+        );
+        if (selectedShape === undefined) {
+          throw new Error("shape not found, shouldn't occur");
+        }
+        if (isSolidShape(selectedShape)) {
+          selectedShape.shapeTopLeftCoordinates = {
+            realX: selectedShape.shapeTopLeftCoordinates.realX + movData.deltaX,
+            realY: selectedShape.shapeTopLeftCoordinates.realY + movData.deltaY,
+          };
+        } else {
+          selectedShape.points.forEach((point) => {
+            point.realX += movData.deltaX;
+            point.realY += movData.deltaY;
+          });
         }
       }
     })

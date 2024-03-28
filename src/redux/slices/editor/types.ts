@@ -20,6 +20,7 @@ export enum ShapeModifierLocation {
   tr,
   bl,
   br,
+  inside,
 }
 
 type solidShapeType = "crcl" | "rect" | "trng";

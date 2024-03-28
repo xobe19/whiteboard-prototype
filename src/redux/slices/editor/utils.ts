@@ -172,7 +172,7 @@ export function getRotatedBoundaryPoints(
 
 export function getNewBoundaryPoints(
   boundaryPoints: RealPoint[],
-  location: ShapeModifierLocation,
+  location: Exclude<ShapeModifierLocation, ShapeModifierLocation.inside>,
   newPosition: RealPoint
 ) {
   let fixedPoint: RealPoint;

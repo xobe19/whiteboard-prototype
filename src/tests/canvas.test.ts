@@ -466,3 +466,31 @@ test("resizing solid shape", () => {
   expect(shape.width).toBeCloseTo(2.3660254);
   expect(shape.height).toBeCloseTo(2.9019);
 });
+
+test("shape dragging", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+  //selecting the shape to rotate it
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 250 }));
+  store.dispatch(mouseUp({ virtualX: 250, virtualY: 250 }));
+  store.dispatch(rotateShapeTextFieldEnter(60));
+  expect(
+    store.getState().editor.canvas.singleSelectShapeID
+  ).not.toBeUndefined();
+  //shape is selected already before reaching here
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 225 }));
+  expect(
+    store.getState().editor.canvas.activeShapeModifierLocation
+  ).not.toBeUndefined();
+  store.dispatch(
+    mouseMove({ virtualX: 0, virtualY: 0, deltaX: 250, deltaY: -250 })
+  );
+  let shape = store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape;
+  expect(shape.shapeTopLeftCoordinates).toStrictEqual({
+    realX: 450,
+    realY: -450,
+  });
+  expect(shape.width).toBe(100);
+  expect(shape.height).toBe(200);
+});
