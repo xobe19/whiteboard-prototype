@@ -266,6 +266,7 @@ test("resizing shape", () => {
   store.dispatch(
     mouseMove({ virtualX: 100, virtualY: 800, deltaX: 0, deltaY: 0 })
   );
+  store.dispatch(mouseUp({ virtualX: 100, virtualY: 800 }));
   expect(
     (store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape)
       .shapeTopLeftCoordinates
