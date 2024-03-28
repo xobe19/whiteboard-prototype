@@ -10,7 +10,14 @@ import {
   isSolidShape,
   RealPoint,
 } from "./types";
-import { getRealPoint, getSelectedShapeID, rotateCoordinates } from "./utils";
+import {
+  getNewBoundaryPoints,
+  getRealPoint,
+  getRotatedBoundaryPoints,
+  getSelectedShapeID,
+  getTopLeftPointAndWidthAndHeight,
+  rotateCoordinates,
+} from "./utils";
 import { uid } from "uid";
 import { shallowEquals } from "../../../utils/shallowEquals";
 import { WritableDraft } from "immer/dist/internal.js";
@@ -203,13 +210,20 @@ const editorReducer = createReducer(initialState, (builder) => {
           throw new Error("shape not found, shouldn't occur");
         }
 
+        let newWidth: number;
+        let newHeight: number;
+        let newTopLeftCoordinates: RealPoint;
+        let newXAxisInclination: number;
+
         let oldTopLeftPoint: WritableDraft<RealPoint>;
         let oldWidth: number;
         let oldHeight: number;
+        let oldXAxisInclination: number;
         if (isSolidShape(selectedShape)) {
           oldTopLeftPoint = selectedShape.shapeTopLeftCoordinates;
           oldHeight = selectedShape.height;
           oldWidth = selectedShape.width;
+          oldXAxisInclination = selectedShape.xAxisInclination;
         } else {
           oldTopLeftPoint = {
             realX: Math.min(
@@ -225,57 +239,80 @@ const editorReducer = createReducer(initialState, (builder) => {
 
           oldWidth = Math.max(...oldXs) - Math.min(...oldXs);
           oldHeight = Math.max(...oldYs) - Math.min(...oldYs);
-        }
-        let point1;
-        let point2;
-        let rotatedPnt = rotateCoordinates(
-          oldTopLeftPoint,
-          pnt,
-          selectedShape.xAxisInclination,
-          true
-        );
-        switch (state.canvas.activeShapeModifierLocation) {
-          case ShapeModifierLocation.tl: {
-            point1 = rotatedPnt;
-            point2 = {
-              realX: oldTopLeftPoint.realX + oldWidth,
-              realY: oldTopLeftPoint.realY - oldHeight,
-            };
-            break;
-          }
-          case ShapeModifierLocation.br: {
-            point1 = rotatedPnt;
-            point2 = oldTopLeftPoint;
-            break;
-          }
-          case ShapeModifierLocation.bl: {
-            point1 = rotatedPnt;
-            point2 = {
-              realX: oldTopLeftPoint.realX + oldWidth,
-              realY: oldTopLeftPoint.realY,
-            };
-            break;
-          }
-          case ShapeModifierLocation.tr: {
-            point1 = rotatedPnt;
-            point2 = {
-              realX: oldTopLeftPoint.realX,
-              realY: oldTopLeftPoint.realY - oldHeight,
-            };
-          }
+          oldXAxisInclination = selectedShape.xAxisInclination;
         }
 
-        const newWidth = Math.abs(point2.realX - point1.realX);
-        const newHeight = Math.abs(point2.realY - point1.realY);
-        const newTopLeftCoordinates = {
-          realX: Math.min(point1.realX, point2.realX),
-          realY: Math.max(point1.realY, point2.realY),
-        };
+        if (selectedShape.xAxisInclination !== 0) {
+          let newBoundaryPoints = getNewBoundaryPoints(
+            getRotatedBoundaryPoints(
+              oldTopLeftPoint,
+              oldWidth,
+              oldHeight,
+              oldXAxisInclination
+            ),
+            state.canvas.activeShapeModifierLocation,
+            pnt
+          );
+          ({
+            topLeft: newTopLeftCoordinates,
+            width: newWidth,
+            height: newHeight,
+            xAxisInclination: newXAxisInclination,
+          } = getTopLeftPointAndWidthAndHeight(newBoundaryPoints));
+        } else {
+          let point1;
+          let point2;
+          let rotatedPnt = rotateCoordinates(
+            oldTopLeftPoint,
+            pnt,
+            selectedShape.xAxisInclination,
+            true
+          );
+          switch (state.canvas.activeShapeModifierLocation) {
+            case ShapeModifierLocation.tl: {
+              point1 = rotatedPnt;
+              point2 = {
+                realX: oldTopLeftPoint.realX + oldWidth,
+                realY: oldTopLeftPoint.realY - oldHeight,
+              };
+              break;
+            }
+            case ShapeModifierLocation.br: {
+              point1 = rotatedPnt;
+              point2 = oldTopLeftPoint;
+              break;
+            }
+            case ShapeModifierLocation.bl: {
+              point1 = rotatedPnt;
+              point2 = {
+                realX: oldTopLeftPoint.realX + oldWidth,
+                realY: oldTopLeftPoint.realY,
+              };
+              break;
+            }
+            case ShapeModifierLocation.tr: {
+              point1 = rotatedPnt;
+              point2 = {
+                realX: oldTopLeftPoint.realX,
+                realY: oldTopLeftPoint.realY - oldHeight,
+              };
+            }
+          }
+
+          newWidth = Math.abs(point2.realX - point1.realX);
+          newHeight = Math.abs(point2.realY - point1.realY);
+          newTopLeftCoordinates = {
+            realX: Math.min(point1.realX, point2.realX),
+            realY: Math.max(point1.realY, point2.realY),
+          };
+          newXAxisInclination = 0;
+        }
 
         if (isSolidShape(selectedShape)) {
           selectedShape.width = newWidth;
           selectedShape.height = newHeight;
           selectedShape.shapeTopLeftCoordinates = newTopLeftCoordinates;
+          selectedShape.xAxisInclination = newXAxisInclination;
         } else {
           // co-ordinates relative to the top left point(just subtracting) before the shape was modified
 

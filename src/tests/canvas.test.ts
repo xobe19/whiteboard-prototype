@@ -440,15 +440,24 @@ test("resizing rotated fn", () => {
   ]);
 });
 
-test("resizing a rotated solid shape", () => {
+test("resizing solid shape", () => {
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ virtualX: 1, virtualY: 2 }));
   store.dispatch(mouseUp({ virtualX: 4, virtualY: 7 }));
-  //selecting the shape to rotate it
-  store.dispatch(mouseDown({ virtualX: 3, virtualY: 4 }));
-  store.dispatch(rotateShapeTextFieldEnter(45));
+  //selecting the shape
+
+  store.dispatch(mouseDown({ virtualX: 3, virtualY: 5 }));
+  store.dispatch(rotateShapeTextFieldEnter(60));
 
   store.dispatch(shapeModifierClick(ShapeModifierLocation.tr));
   store.dispatch(mouseMove({ virtualX: 4, virtualY: 1, deltaX: 0, deltaY: 0 }));
-  console.log(store.getState().editor.canvas.shapes.slice(-1)[0]);
+
+  let shape = store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape;
+
+  expect(shape.shapeTopLeftCoordinates).toStrictEqual({
+    realX: 2.81698729810778,
+    realY: -3.049038105676659,
+  });
+  expect(shape.width).toBeCloseTo(2.3660254);
+  expect(shape.height).toBeCloseTo(2.9019);
 });

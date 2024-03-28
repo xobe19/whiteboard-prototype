@@ -219,3 +219,52 @@ export function getOrthogonalProjection(point: RealPoint, line: Line) {
   let newLine = getLineFromPointAndSlope(point, -1 / line.m);
   return intersection(newLine, line);
 }
+
+// points: RealPoint[] has points in no specific order
+// selecting the left most point as pivot
+export function getTopLeftPointAndWidthAndHeight(points: RealPoint[]) {
+  const Xs = points.map((point) => point.realX);
+  const Ys = points.map((point) => point.realY);
+  let minX = Math.min(...Xs);
+
+  let leftMostPoints: RealPoint[] = [];
+
+  for (let point of points) {
+    if (point.realX === minX) {
+      leftMostPoints.push(point);
+    }
+  }
+
+  if (leftMostPoints.length === 2) {
+    // x axis inclination is 0
+    let topLeft = { realX: minX, realY: Math.max(...Ys) };
+    let bottomRight = { realX: Math.max(...Ys), realY: Math.min(...Ys) };
+    return {
+      topLeft,
+      width: bottomRight.realX - topLeft.realX,
+      height: topLeft.realY - topLeft.realX,
+      xAxisInclination: 0,
+    };
+  } else {
+    let maxY = Math.max(...Ys);
+    // if leftMostPoint is 1, topMost also is only 1
+    let topMostPoint = points.find((point) => point.realY === maxY)!;
+    let slope =
+      (topMostPoint.realY - leftMostPoints[0].realY) /
+      (topMostPoint.realX - leftMostPoints[0].realX);
+    let xAxisInclination = Math.atan(slope);
+    let straightenedPoints = points.map((point) =>
+      rotateCoordinates(leftMostPoints[0], point, xAxisInclination, true)
+    );
+    return {
+      topLeft: leftMostPoints[0],
+      width:
+        Math.max(...straightenedPoints.map((point) => point.realX)) -
+        leftMostPoints[0].realX,
+      height:
+        leftMostPoints[0].realY -
+        Math.min(...straightenedPoints.map((point) => point.realY)),
+      xAxisInclination,
+    };
+  }
+}
