@@ -280,6 +280,10 @@ test("resizing shape", () => {
   expect(
     (store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape).height
   ).toBe(300);
+
+  expect(
+    store.getState().editor.canvas.activeShapeModifierLocation
+  ).toBeUndefined();
 });
 
 test("rotation function & direction", () => {
