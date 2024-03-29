@@ -26,6 +26,7 @@ import {
 let store = configureStore({
   reducer: { editor: editorReducer },
 });
+
 beforeEach(() => {
   store = configureStore({ reducer: { editor: editorReducer } });
 });
@@ -493,4 +494,44 @@ test("shape dragging", () => {
   });
   expect(shape.width).toBe(100);
   expect(shape.height).toBe(200);
+});
+
+test("drawing an arrow between two shapes", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+
+  let shape1ID = store.getState().editor.canvas.shapes.slice(-1)[0].id;
+
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 1000, virtualY: 1400 }));
+  store.dispatch(mouseUp({ virtualX: 1500, virtualY: 1700 }));
+
+  let shape2ID = store.getState().editor.canvas.shapes.slice(-1)[0].id;
+
+  store.dispatch(changeCanvasMode(CanvasMode.DrawArrow));
+
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
+  store.dispatch(mouseUp({ virtualX: 1200, virtualY: 1500 }));
+
+  let latestArrow = store.getState().editor.canvas.arrows.slice(-1)[0];
+
+  expect(latestArrow.fromShapeID).toBe(shape1ID);
+  expect(latestArrow.toShapeID).toBe(shape2ID);
+});
+test("drawing an arrow but it's aborted", () => {
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
+  store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
+
+  store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
+  store.dispatch(mouseDown({ virtualX: 1000, virtualY: 1400 }));
+  store.dispatch(mouseUp({ virtualX: 1500, virtualY: 1700 }));
+
+  store.dispatch(changeCanvasMode(CanvasMode.DrawArrow));
+
+  store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
+  store.dispatch(mouseUp({ virtualX: 700, virtualY: 1500 }));
+
+  expect(store.getState().editor.canvas.arrows.length).toBe(0);
 });

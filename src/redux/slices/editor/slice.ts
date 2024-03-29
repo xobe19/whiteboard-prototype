@@ -48,6 +48,7 @@ let initialState: Editor = {
     b: { realX: 0, realY: 0 },
 
     currFreeDrawPoints: [],
+    arrows: [],
   },
   keyState: {
     isCtrlDown: false,
@@ -171,6 +172,18 @@ const editorReducer = createReducer(initialState, (builder) => {
         state.canvas.currFreeDrawPoints = [];
       } else if (state.canvas.mode === CanvasMode.ShapeModify) {
         state.canvas.activeShapeModifierLocation = undefined;
+      } else if (state.canvas.mode === CanvasMode.DrawArrow) {
+        let mdPoint = state.keyState.previousMouseDown!;
+        let shape1ID = getSelectedShapeID(mdPoint, state.canvas.shapes);
+        if (shape1ID !== "") {
+          let shape2ID = getSelectedShapeID(muPoint, state.canvas.shapes);
+          if (shape2ID !== "") {
+            state.canvas.arrows.push({
+              fromShapeID: shape1ID,
+              toShapeID: shape2ID,
+            });
+          }
+        }
       }
       state.keyState.isMouseDown = false;
     })

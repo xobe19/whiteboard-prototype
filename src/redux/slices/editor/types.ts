@@ -49,11 +49,17 @@ export enum CanvasMode {
   FreeDraw,
   Default,
   ShapeModify,
+  DrawArrow,
 }
 
 export interface Toolbox {
   selectedColor: string;
   selectedSolidShapeType: solidShapeType;
+}
+
+export interface Arrow {
+  fromShapeID: string;
+  toShapeID: string;
 }
 
 export interface Canvas {
@@ -65,6 +71,7 @@ export interface Canvas {
   currFreeDrawPoints: RealPoint[];
   singleSelectShapeID?: string;
   activeShapeModifierLocation?: ShapeModifierLocation;
+  arrows: Arrow[];
 }
 
 export interface KeyState {
