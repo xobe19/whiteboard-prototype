@@ -149,7 +149,8 @@ const editorReducer = createReducer(initialState, (builder) => {
           backgroundFilled: false,
         };
         state.canvas.shapes.push(newShape);
-        state.canvas.mode = CanvasMode.Default;
+        state.canvas.mode = CanvasMode.ShapeModify;
+        state.canvas.singleSelectShapeID = newShape.id;
       } else if (state.canvas.mode === CanvasMode.FreeDraw) {
         // mousemove may not register the last co-ordinate
 
@@ -169,8 +170,9 @@ const editorReducer = createReducer(initialState, (builder) => {
           xAxisInclination: 0,
         };
         state.canvas.shapes.push(newShape);
-        state.canvas.mode = CanvasMode.Default;
+        state.canvas.mode = CanvasMode.ShapeModify;
         state.canvas.currFreeDrawPoints = [];
+        state.canvas.singleSelectShapeID = newShape.id;
       } else if (state.canvas.mode === CanvasMode.ShapeModify) {
         state.canvas.activeShapeModifierLocation = undefined;
       } else if (state.canvas.mode === CanvasMode.DrawArrow) {
@@ -197,6 +199,9 @@ const editorReducer = createReducer(initialState, (builder) => {
 
     .addCase(changeCanvasMode, (state, action) => {
       let newCanvasMode = action.payload;
+      if (newCanvasMode === CanvasMode.Default) {
+        state.canvas.singleSelectShapeID = "";
+      }
       state.canvas.mode = newCanvasMode;
     })
     .addCase(mouseMove, (state, action) => {
@@ -390,6 +395,7 @@ const editorReducer = createReducer(initialState, (builder) => {
     .addCase(shapeModifierClick, (state, action) => {
       let clickedLocation = action.payload;
       state.canvas.activeShapeModifierLocation = clickedLocation;
+      state.keyState.isMouseDown = true;
     })
     .addCase(rotateShapeTextFieldEnter, (state, action) => {
       let selectedShape = state.canvas.shapes.find(
