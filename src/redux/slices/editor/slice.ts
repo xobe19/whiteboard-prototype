@@ -72,6 +72,7 @@ let shapeModifierClick = createAction<ShapeModifierLocation>(
 let rotateShapeTextFieldEnter = createAction<number>(
   "canvas/rotateShapeTextFieldEnter"
 );
+let noteTextFieldEnter = createAction<string>("canvas/noteTextFieldEnter");
 
 // -------- REDUCER ----------
 
@@ -404,6 +405,13 @@ const editorReducer = createReducer(initialState, (builder) => {
       let newAngleInRadians = (Math.PI * newAngleInDegrees) / 180;
 
       selectedShape.xAxisInclination = newAngleInRadians;
+    })
+    .addCase(noteTextFieldEnter, (state, action) => {
+      let newNote = action.payload;
+      let selectedShape = state.canvas.shapes.find(
+        (shape) => shape.id === state.canvas.singleSelectShapeID
+      ) as SolidShape;
+      selectedShape.noteContents = newNote;
     });
 });
 
