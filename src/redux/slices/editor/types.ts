@@ -29,7 +29,7 @@ export interface SolidShape {
   id: string;
   type: solidShapeType;
   backgroundColor: string;
-  backgroundFilled: boolean;
+  borderColor: string;
   shapeTopLeftCoordinates: RealPoint;
   width: number;
   height: number;
@@ -53,7 +53,6 @@ export enum CanvasMode {
 }
 
 export interface Toolbox {
-  selectedColor: string;
   selectedSolidShapeType: solidShapeType;
 }
 

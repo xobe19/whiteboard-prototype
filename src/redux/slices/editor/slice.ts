@@ -24,7 +24,7 @@ import { WritableDraft } from "immer/dist/internal.js";
 let toID = uid;
 let sampleShape1: SolidShape = {
   backgroundColor: "blue",
-  backgroundFilled: false,
+  borderColor: "#00000000",
   shapeTopLeftCoordinates: { realX: 500, realY: 500 },
   id: "shape1",
   type: "rect",
@@ -36,7 +36,6 @@ let sampleShape1: SolidShape = {
 
 let initialState: Editor = {
   toolbox: {
-    selectedColor: "pink",
     selectedSolidShapeType: "rect",
   },
   canvas: {
@@ -142,11 +141,11 @@ const editorReducer = createReducer(initialState, (builder) => {
           xAxisInclination: 0,
           id: toID(),
           type: state.toolbox.selectedSolidShapeType,
-          backgroundColor: state.toolbox.selectedColor,
+          backgroundColor: "#00000000",
+          borderColor: "#ff000000",
           width: Math.abs(mdPoint.realX - muPoint.realX),
           height: Math.abs(mdPoint.realY - muPoint.realY),
           noteContents: "",
-          backgroundFilled: false,
         };
         state.canvas.shapes.push(newShape);
         state.canvas.mode = CanvasMode.ShapeModify;
@@ -166,7 +165,7 @@ const editorReducer = createReducer(initialState, (builder) => {
         let newShape: FreeDrawnShape = {
           id: toID(),
           points: state.canvas.currFreeDrawPoints,
-          strokeColor: state.toolbox.selectedColor,
+          strokeColor: "#00000000",
           xAxisInclination: 0,
         };
         state.canvas.shapes.push(newShape);
