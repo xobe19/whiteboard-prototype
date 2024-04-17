@@ -31,16 +31,20 @@ beforeEach(() => {
   store = configureStore({ reducer: { editor: editorReducer } });
 });
 
+const getCv = () => {
+  return store.getState().editor.canvas;
+};
+
 test("create solid shape", () => {
-  let old_shape_cnt = store.getState().editor.canvas.shapes.length;
+  let old_shape_cnt = getCv().shapes.length;
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
   store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
 
-  let new_shape_cnt = store.getState().editor.canvas.shapes.length;
+  let new_shape_cnt = getCv().shapes.length;
   expect(new_shape_cnt - old_shape_cnt).toBe(1);
 });
 
@@ -48,11 +52,11 @@ test("adding shapes in a weird way (without panning)", () => {
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ virtualX: 5, virtualY: 4 }));
   store.dispatch(mouseUp({ virtualX: 4, virtualY: 6 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
   // get the newly inserted shape
-  let shapes = store.getState().editor.canvas.shapes;
+  let shapes = getCv().shapes;
   let recently_inserted_shape = shapes[shapes.length - 1];
   if (isSolidShape(recently_inserted_shape)) {
     expect(recently_inserted_shape.shapeTopLeftCoordinates).toStrictEqual({
@@ -73,11 +77,11 @@ test("adding shapes in even weird way (with panning)", () => {
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ virtualX: 5, virtualY: 4 }));
   store.dispatch(mouseUp({ virtualX: 4, virtualY: 6 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
 
-  let shapes = store.getState().editor.canvas.shapes;
+  let shapes = getCv().shapes;
   let recently_inserted_shape = shapes[shapes.length - 1];
   if (isSolidShape(recently_inserted_shape)) {
     expect(recently_inserted_shape.shapeTopLeftCoordinates).toStrictEqual({
@@ -96,12 +100,12 @@ test("adding shapes while zoomed in", () => {
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ virtualX: 5, virtualY: 4 }));
   store.dispatch(mouseUp({ virtualX: 4, virtualY: 6 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
 
   // get the newly inserted shape
-  let shapes = store.getState().editor.canvas.shapes;
+  let shapes = getCv().shapes;
   let recently_inserted_shape = shapes[shapes.length - 1];
 
   if (isSolidShape(recently_inserted_shape)) {
@@ -123,11 +127,11 @@ test("testing free drawing", () => {
   store.dispatch(mouseMove({ virtualX: 2, virtualY: 2, deltaX: 1, deltaY: 1 }));
   store.dispatch(mouseMove({ virtualX: 3, virtualY: 3, deltaX: 1, deltaY: 1 }));
   store.dispatch(mouseUp({ virtualX: 3, virtualY: 3 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
   store.dispatch(mouseMove({ virtualX: 4, virtualY: 4, deltaX: 1, deltaY: 1 }));
-  let shapes = store.getState().editor.canvas.shapes;
+  let shapes = getCv().shapes;
   let recently_inserted_shape = shapes[shapes.length - 1];
 
   if (!isSolidShape(recently_inserted_shape)) {
@@ -141,8 +145,8 @@ test("testing free drawing", () => {
     expect(true).toBe(false);
   }
 
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
-  expect(store.getState().editor.canvas.currFreeDrawPoints.length).toBe(0);
+  expect(getCv().mode).toBe(CanvasMode.Default);
+  expect(getCv().currFreeDrawPoints.length).toBe(0);
 });
 
 test("selecting a shape", () => {
@@ -150,11 +154,11 @@ test("selecting a shape", () => {
   store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
   store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
 
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
 
-  let lastShape = store.getState().editor.canvas.shapes.slice(-1)[0];
+  let lastShape = getCv().shapes.slice(-1)[0];
   if (isSolidShape(lastShape)) {
     let pnt = lastShape.shapeTopLeftCoordinates;
     expect(pnt).toStrictEqual({
@@ -170,8 +174,8 @@ test("selecting a shape", () => {
 
   let shapeID = lastShape.id;
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
-  let lastSelectedShapeID = store.getState().editor.canvas.singleSelectShapeID;
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
+  let lastSelectedShapeID = getCv().singleSelectShapeID;
   expect(lastSelectedShapeID).toBe(shapeID);
 });
 
@@ -179,11 +183,11 @@ test("not selecting a shape", () => {
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
   store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
 
-  let lastShape = store.getState().editor.canvas.shapes.slice(-1)[0];
+  let lastShape = getCv().shapes.slice(-1)[0];
   if (isSolidShape(lastShape)) {
     let pnt = lastShape.shapeTopLeftCoordinates;
     expect(pnt).toStrictEqual({
@@ -201,7 +205,7 @@ test("not selecting a shape", () => {
   store.dispatch(mouseUp({ virtualX: 250, virtualY: 500 }));
   store.dispatch(mouseDown({ virtualX: 100, virtualY: 300 }));
   store.dispatch(mouseUp({ virtualX: 100, virtualY: 300 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
+  expect(getCv().mode).toBe(CanvasMode.Default);
 });
 
 test("selecting free drawn shape", () => {
@@ -212,17 +216,17 @@ test("selecting free drawn shape", () => {
   store.dispatch(mouseMove({ virtualX: 3, virtualY: 3, deltaX: 1, deltaY: 1 }));
   store.dispatch(mouseUp({ virtualX: 3, virtualY: 3 }));
   store.dispatch(mouseMove({ virtualX: 4, virtualY: 4, deltaX: 1, deltaY: 1 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
 
-  let shapes = store.getState().editor.canvas.shapes;
+  let shapes = getCv().shapes;
   let recently_inserted_shape = shapes[shapes.length - 1];
 
   if (!isSolidShape(recently_inserted_shape)) {
     store.dispatch(mouseDown({ virtualX: 1, virtualY: 1.5 }));
     store.dispatch(mouseUp({ virtualX: 1, virtualY: 1.5 }));
-    expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+    expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   } else {
     expect(true).toBe(false);
   }
@@ -235,9 +239,9 @@ test("deselecting shape", () => {
 
   store.dispatch(mouseDown({ virtualX: 100, virtualY: 100 }));
   store.dispatch(mouseUp({ virtualX: 100, virtualY: 100 }));
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.Default);
+  expect(getCv().mode).toBe(CanvasMode.Default);
 
-  expect(store.getState().editor.canvas.singleSelectShapeID).toBe("");
+  expect(getCv().singleSelectShapeID).toBe("");
 });
 
 test("reselecting a single shape", () => {
@@ -245,14 +249,14 @@ test("reselecting a single shape", () => {
   store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
   store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
 
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
 
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
   store.dispatch(mouseUp({ virtualX: 250, virtualY: 300 }));
 
-  expect(store.getState().editor.canvas.mode).toBe(CanvasMode.ShapeModify);
+  expect(getCv().mode).toBe(CanvasMode.ShapeModify);
   // change it to default for selecting shape
   store.dispatch(changeCanvasMode(CanvasMode.Default));
 
@@ -261,8 +265,8 @@ test("reselecting a single shape", () => {
   store.dispatch(mouseUp({ virtualX: 500, virtualY: 500 }));
   store.dispatch(mouseDown({ virtualX: 450, virtualY: 400 }));
 
-  let lastShape = store.getState().editor.canvas.shapes.slice(-1)[0];
-  expect(lastShape.id).toBe(store.getState().editor.canvas.singleSelectShapeID);
+  let lastShape = getCv().shapes.slice(-1)[0];
+  expect(lastShape.id).toBe(getCv().singleSelectShapeID);
 });
 
 test("resizing shape", () => {
@@ -280,8 +284,8 @@ test("resizing shape", () => {
   store.dispatch(mouseDown({ virtualX: 400, virtualY: 350 }));
   store.dispatch(mouseUp({ virtualX: 500, virtualY: 500 }));
 
-  let lastShapeID = store.getState().editor.canvas.shapes.slice(-1)[0].id;
-  expect(lastShapeID).toBe(store.getState().editor.canvas.singleSelectShapeID);
+  let lastShapeID = getCv().shapes.slice(-1)[0].id;
+  expect(lastShapeID).toBe(getCv().singleSelectShapeID);
 
   //expanding top left co-ordinate
   store.dispatch(shapeModifierClick(ShapeModifierLocation.tl));
@@ -302,23 +306,16 @@ test("resizing shape", () => {
   );
   store.dispatch(mouseUp({ virtualX: 100, virtualY: 800 }));
   expect(
-    (store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape)
-      .shapeTopLeftCoordinates
+    (getCv().shapes.slice(-1)[0] as SolidShape).shapeTopLeftCoordinates
   ).toStrictEqual({
     realX: 100,
     realY: -500,
   });
-  expect(
-    (store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape).width
-  ).toBe(200);
+  expect((getCv().shapes.slice(-1)[0] as SolidShape).width).toBe(200);
 
-  expect(
-    (store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape).height
-  ).toBe(300);
+  expect((getCv().shapes.slice(-1)[0] as SolidShape).height).toBe(300);
 
-  expect(
-    store.getState().editor.canvas.activeShapeModifierLocation
-  ).toBeUndefined();
+  expect(getCv().activeShapeModifierLocation).toBeUndefined();
 });
 
 test("rotation function & direction", () => {
@@ -350,7 +347,7 @@ test("rotate shape", () => {
   //3. passing value to rotate field
   store.dispatch(rotateShapeTextFieldEnter(45));
 
-  let selectedShapeID = store.getState().editor.canvas.singleSelectShapeID;
+  let selectedShapeID = getCv().singleSelectShapeID;
 
   let selectedShape = store
     .getState()
@@ -380,16 +377,16 @@ test("free drawing panning", () => {
   store.dispatch(
     mouseMove({ virtualX: 6, virtualY: 1, deltaX: -1, deltaY: -1 })
   );
-  expect(store.getState().editor.canvas.b).toStrictEqual({
+  expect(getCv().b).toStrictEqual({
     realX: 1,
     realY: -1,
   });
 
   store.dispatch(mouseDown({ virtualX: 6.5, virtualY: 4.5 }));
-  expect(store.getState().editor.canvas.singleSelectShapeID).toBeFalsy();
+  expect(getCv().singleSelectShapeID).toBeFalsy();
 
   store.dispatch(mouseDown({ virtualX: 0.5, virtualY: 0.5 }));
-  expect(store.getState().editor.canvas.singleSelectShapeID).toBeTruthy();
+  expect(getCv().singleSelectShapeID).toBeTruthy();
 
   //shape is selected now
 });
@@ -409,9 +406,7 @@ test("free drawing resizing", () => {
   store.dispatch(shapeModifierClick(ShapeModifierLocation.tl));
   store.dispatch(mouseMove({ virtualX: 0, virtualY: 1, deltaX: 0, deltaY: 0 }));
   store.dispatch(mouseUp({ virtualX: 0, virtualY: 1 }));
-  let new_points = (
-    store.getState().editor.canvas.shapes.slice(-1)[0] as FreeDrawnShape
-  ).points;
+  let new_points = (getCv().shapes.slice(-1)[0] as FreeDrawnShape).points;
 
   expect(new_points).toStrictEqual([
     { realX: 0, realY: -1 },
@@ -434,9 +429,7 @@ test("checking if a rotated solid shape is selected", () => {
 
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 150 }));
 
-  expect(
-    store.getState().editor.canvas.singleSelectShapeID
-  ).not.toBeUndefined();
+  expect(getCv().singleSelectShapeID).not.toBeUndefined();
 });
 
 test("rotated boundary points function", () => {
@@ -480,7 +473,7 @@ test("resizing solid shape", () => {
   store.dispatch(shapeModifierClick(ShapeModifierLocation.tr));
   store.dispatch(mouseMove({ virtualX: 4, virtualY: 1, deltaX: 0, deltaY: 0 }));
 
-  let shape = store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape;
+  let shape = getCv().shapes.slice(-1)[0] as SolidShape;
 
   expect(shape.shapeTopLeftCoordinates).toStrictEqual({
     realX: 2.81698729810778,
@@ -496,18 +489,14 @@ test("shape dragging", () => {
   store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
 
   store.dispatch(rotateShapeTextFieldEnter(60));
-  expect(
-    store.getState().editor.canvas.singleSelectShapeID
-  ).not.toBeUndefined();
+  expect(getCv().singleSelectShapeID).not.toBeUndefined();
   //shape is selected already before reaching here
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 225 }));
-  expect(
-    store.getState().editor.canvas.activeShapeModifierLocation
-  ).not.toBeUndefined();
+  expect(getCv().activeShapeModifierLocation).not.toBeUndefined();
   store.dispatch(
     mouseMove({ virtualX: 0, virtualY: 0, deltaX: 250, deltaY: -250 })
   );
-  let shape = store.getState().editor.canvas.shapes.slice(-1)[0] as SolidShape;
+  let shape = getCv().shapes.slice(-1)[0] as SolidShape;
   expect(shape.shapeTopLeftCoordinates).toStrictEqual({
     realX: 450,
     realY: -450,
@@ -521,20 +510,20 @@ test("drawing an arrow between two shapes", () => {
   store.dispatch(mouseDown({ virtualX: 200, virtualY: 200 }));
   store.dispatch(mouseUp({ virtualX: 300, virtualY: 400 }));
 
-  let shape1ID = store.getState().editor.canvas.shapes.slice(-1)[0].id;
+  let shape1ID = getCv().shapes.slice(-1)[0].id;
 
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
   store.dispatch(mouseDown({ virtualX: 1000, virtualY: 1400 }));
   store.dispatch(mouseUp({ virtualX: 1500, virtualY: 1700 }));
 
-  let shape2ID = store.getState().editor.canvas.shapes.slice(-1)[0].id;
+  let shape2ID = getCv().shapes.slice(-1)[0].id;
 
   store.dispatch(changeCanvasMode(CanvasMode.DrawArrow));
 
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
   store.dispatch(mouseUp({ virtualX: 1200, virtualY: 1500 }));
 
-  let latestArrow = store.getState().editor.canvas.arrows.slice(-1)[0];
+  let latestArrow = getCv().arrows.slice(-1)[0];
 
   expect(latestArrow.fromShapeID).toBe(shape1ID);
   expect(latestArrow.toShapeID).toBe(shape2ID);
@@ -553,5 +542,5 @@ test("drawing an arrow but it's aborted", () => {
   store.dispatch(mouseDown({ virtualX: 250, virtualY: 300 }));
   store.dispatch(mouseUp({ virtualX: 700, virtualY: 1500 }));
 
-  expect(store.getState().editor.canvas.arrows.length).toBe(0);
+  expect(getCv().arrows.length).toBe(0);
 });
