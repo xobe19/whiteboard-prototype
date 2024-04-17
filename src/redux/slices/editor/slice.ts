@@ -9,6 +9,7 @@ import {
   ShapeModifierLocation,
   isSolidShape,
   RealPoint,
+  WindowDimensions,
 } from "./types";
 import {
   getNewBoundaryPoints,
@@ -42,6 +43,8 @@ let initialState: Editor = {
     id: "local_canvas_1",
     shapes: [sampleShape1],
     mode: CanvasMode.Default,
+    height: 0,
+    width: 0,
 
     zoom: 1.0,
     b: { realX: 0, realY: 0 },
@@ -72,6 +75,8 @@ let rotateShapeTextFieldEnter = createAction<number>(
   "canvas/rotateShapeTextFieldEnter"
 );
 let noteTextFieldEnter = createAction<string>("canvas/noteTextFieldEnter");
+let windowResize = createAction<WindowDimensions>("canvas/windowResize");
+let windowSetup = createAction<WindowDimensions>("canvas/windowSetup");
 
 // -------- REDUCER ----------
 
@@ -417,6 +422,16 @@ const editorReducer = createReducer(initialState, (builder) => {
         (shape) => shape.id === state.canvas.singleSelectShapeID
       ) as SolidShape;
       selectedShape.noteContents = newNote;
+    })
+    .addCase(windowResize, (state, action) => {
+      let newDimensions = action.payload;
+      state.canvas.width = newDimensions.width;
+      state.canvas.height = newDimensions.height;
+    })
+    .addCase(windowSetup, (state, action) => {
+      let newDimensions = action.payload;
+      state.canvas.width = newDimensions.width;
+      state.canvas.height = newDimensions.height;
     });
 });
 
@@ -431,4 +446,6 @@ export {
   rightMouseDown,
   shapeModifierClick,
   rotateShapeTextFieldEnter,
+  windowResize,
+  windowSetup,
 };

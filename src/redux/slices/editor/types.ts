@@ -71,6 +71,8 @@ export interface Canvas {
   singleSelectShapeID?: string;
   activeShapeModifierLocation?: ShapeModifierLocation;
   arrows: Arrow[];
+  width: number;
+  height: number;
 }
 
 export interface KeyState {
@@ -84,6 +86,15 @@ export interface Editor {
   canvas: Canvas;
   toolbox: Toolbox;
   keyState: KeyState;
+}
+
+export interface WindowDimensions {
+  height: number;
+  width: number;
+}
+
+export interface StoreState {
+  editor: Editor;
 }
 
 export type Line = {
