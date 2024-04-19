@@ -1,5 +1,7 @@
 import { Canvas } from "../../redux/slices/editor/types";
 import {
+  ceilToNearestMultiple,
+  floorToNearestMultiple,
   getVirtualDistance,
   getVirtualPoint,
 } from "../../redux/slices/editor/utils";
@@ -8,33 +10,39 @@ export default function renderBackgroundDots(
   ctx: CanvasRenderingContext2D,
   canvasState: Canvas
 ) {
+  const POINT_DISTANCE = 50;
+  const VIRTUAL_POINT_DISTANCE = getVirtualDistance(
+    POINT_DISTANCE,
+    canvasState.zoom
+  );
+
   let tlR = {
-    realX: Math.floor(canvasState.b.realX),
-    realY: Math.ceil(canvasState.b.realY),
+    realX: floorToNearestMultiple(canvasState.b.realX, POINT_DISTANCE),
+    realY: ceilToNearestMultiple(canvasState.b.realY, POINT_DISTANCE),
   };
   let brR = {
-    realX: Math.ceil(tlR.realX + canvasState.width),
-    realY: Math.floor(tlR.realY - canvasState.height),
+    realX: ceilToNearestMultiple(tlR.realX + canvasState.width, POINT_DISTANCE),
+    realY: floorToNearestMultiple(
+      tlR.realY - canvasState.height,
+      POINT_DISTANCE
+    ),
   };
 
   //adding buffer of 50px
 
-  tlR.realX -= 50;
-  tlR.realY += 50;
+  tlR.realX -= 500;
+  tlR.realY += 500;
 
-  brR.realX += 50;
-  brR.realY -= 50;
+  brR.realX += 500;
+  brR.realY -= 500;
 
-  const virtualPointDistance = getVirtualDistance(30, canvasState.zoom);
-
-  for (let x = tlR.realX; x <= brR.realX; x += virtualPointDistance) {
-    for (let y = tlR.realY; y >= brR.realY; y -= virtualPointDistance) {
+  for (let x = tlR.realX; x <= brR.realX; x += VIRTUAL_POINT_DISTANCE) {
+    for (let y = tlR.realY; y >= brR.realY; y -= VIRTUAL_POINT_DISTANCE) {
       let virtualPoint = getVirtualPoint(
         canvasState.b,
         { realX: x, realY: y },
         canvasState.zoom
       );
-      console.log("drawn point");
       ctx.beginPath();
       ctx.arc(
         virtualPoint.virtualX,

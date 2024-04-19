@@ -1,7 +1,15 @@
 import { Fragment, useEffect, useRef } from "react";
 import store from "../redux/store";
 import renderCanvas from "../utils/render/renderCanvas";
-import { windowResize, windowSetup } from "../redux/slices/editor/slice";
+import {
+  mouseDown,
+  mouseMove,
+  mouseUp,
+  rightMouseDown,
+  rightMouseUp,
+  windowResize,
+  windowSetup,
+} from "../redux/slices/editor/slice";
 
 export default function InfiniteCanvas() {
   const htmlCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -32,6 +40,48 @@ export default function InfiniteCanvas() {
       store.dispatch(
         windowResize({ height: window.innerHeight, width: window.innerWidth })
       );
+    });
+
+    htmlCanvasRef.current!.addEventListener("contextmenu", (ev) => {
+      ev.preventDefault();
+    });
+    htmlCanvasRef.current!.addEventListener("mousemove", (ev: MouseEvent) => {
+      ev.preventDefault();
+      console.log("mousemoved");
+      store.dispatch(
+        mouseMove({
+          deltaX: ev.movementX,
+          deltaY: ev.movementY,
+          virtualX: ev.x,
+          virtualY: ev.y,
+        })
+      );
+    });
+
+    htmlCanvasRef.current!.addEventListener("mousedown", (ev: MouseEvent) => {
+      ev.preventDefault();
+      console.log("md", ev.button);
+      switch (ev.button) {
+        case 0:
+          store.dispatch(mouseDown({ virtualX: ev.x, virtualY: ev.y }));
+          break;
+        case 2:
+          console.log("md22");
+          store.dispatch(rightMouseDown());
+          break;
+      }
+    });
+
+    htmlCanvasRef.current!.addEventListener("mouseup", (ev) => {
+      ev.preventDefault();
+      switch (ev.button) {
+        case 0:
+          store.dispatch(mouseUp({ virtualX: ev.x, virtualY: ev.y }));
+          break;
+        case 2:
+          store.dispatch(rightMouseUp());
+          break;
+      }
     });
   }, []);
 

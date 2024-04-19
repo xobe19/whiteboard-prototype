@@ -275,3 +275,11 @@ export function getTopLeftPointAndWidthAndHeight(points: RealPoint[]) {
     };
   }
 }
+
+export function floorToNearestMultiple(num: number, mult: number) {
+  return Math.floor(num / mult) * mult;
+}
+
+export function ceilToNearestMultiple(num: number, mult: number) {
+  return Math.ceil(num / mult) * mult;
+}
