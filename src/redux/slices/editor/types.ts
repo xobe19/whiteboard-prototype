@@ -64,6 +64,7 @@ export interface Arrow {
 export interface Canvas {
   id: string;
   b: RealPoint;
+  previousB: RealPoint;
   zoom: number;
   shapes: (SolidShape | FreeDrawnShape)[];
   mode: CanvasMode;

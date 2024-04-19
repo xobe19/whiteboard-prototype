@@ -67,7 +67,7 @@ export default function InfiniteCanvas() {
           break;
         case 2:
           console.log("md22");
-          store.dispatch(rightMouseDown());
+          store.dispatch(rightMouseDown({ virtualX: ev.x, virtualY: ev.y }));
           break;
       }
     });
