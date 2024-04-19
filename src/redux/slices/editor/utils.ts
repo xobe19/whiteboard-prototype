@@ -41,6 +41,13 @@ export function getVirtualPoint(
   return virtualC;
 }
 
+export function getRealDistance(virtualDistance: number, canvasZoom: number) {
+  return virtualDistance / canvasZoom;
+}
+export function getVirtualDistance(realDistance: number, canvasZoom: number) {
+  return realDistance * canvasZoom;
+}
+
 export function isBetween(a: number, b: number, c: number) {
   return b >= a && b <= c;
 }
