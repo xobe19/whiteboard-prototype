@@ -1,31 +1,29 @@
 import { Fragment, useEffect, useRef } from "react";
-import useWindowSize from "../hooks/useWindowSize";
 import store from "../redux/store";
 import renderCanvas from "../utils/render/renderCanvas";
 import { windowResize, windowSetup } from "../redux/slices/editor/slice";
-import { useSelector } from "react-redux";
-import { Editor, StoreState } from "../redux/slices/editor/types";
 
 export default function InfiniteCanvas() {
   const htmlCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const canvasWidth = useSelector<StoreState, number>(
-    (state) => state.editor.canvas.width
-  );
-  const canvasHeight = useSelector<StoreState, number>(
-    (state) => state.editor.canvas.height
-  );
-  console.log("render");
+  const currentCanvasWidth = useRef(0);
+  const currentCanvasHeight = useRef(0);
+
+  console.log("react render");
 
   useEffect(() => {
-    if (!htmlCanvasRef.current) return;
-    let ctx = htmlCanvasRef.current.getContext("2d");
-    if (ctx === null) return;
-    const canvasState = store.getState().editor.canvas;
-    renderCanvas(ctx, canvasState);
+    let ctx = htmlCanvasRef.current!.getContext("2d");
     store.subscribe(() => {
-      if (ctx === null) return;
       const canvasState = store.getState().editor.canvas;
-      renderCanvas(ctx, canvasState);
+      if (
+        canvasState.width !== currentCanvasWidth.current ||
+        canvasState.height !== currentCanvasHeight.current
+      ) {
+        htmlCanvasRef.current!.width = currentCanvasWidth.current =
+          canvasState.width;
+        htmlCanvasRef.current!.height = currentCanvasHeight.current =
+          canvasState.height;
+      }
+      renderCanvas(ctx!, canvasState);
     });
     store.dispatch(
       windowSetup({ height: window.innerHeight, width: window.innerWidth })
@@ -39,11 +37,7 @@ export default function InfiniteCanvas() {
 
   return (
     <Fragment>
-      <canvas
-        ref={htmlCanvasRef}
-        width={canvasWidth}
-        height={canvasHeight}
-      ></canvas>
+      <canvas ref={htmlCanvasRef}></canvas>
     </Fragment>
   );
 }
