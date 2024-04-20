@@ -71,7 +71,7 @@ test("adding shapes in a weird way (without panning)", () => {
 });
 
 test("adding shapes in even weird way (with panning)", () => {
-  store.dispatch(rightMouseDown());
+  store.dispatch(rightMouseDown({ virtualX: 0, virtualY: 0 }));
   store.dispatch(mouseMove({ deltaX: 1, deltaY: 1, virtualX: 1, virtualY: 1 }));
   store.dispatch(rightMouseUp());
   store.dispatch(changeCanvasMode(CanvasMode.CreateShape));
@@ -373,7 +373,7 @@ test("free drawing panning", () => {
   store.dispatch(mouseUp({ virtualX: 7, virtualY: 2 }));
 
   store.dispatch(changeCanvasMode(CanvasMode.Default));
-  store.dispatch(rightMouseDown());
+  store.dispatch(rightMouseDown({ virtualX: 7, virtualY: 2 }));
   store.dispatch(
     mouseMove({ virtualX: 6, virtualY: 1, deltaX: -1, deltaY: -1 })
   );
