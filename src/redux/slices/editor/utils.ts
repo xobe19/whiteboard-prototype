@@ -74,6 +74,34 @@ export function isPointInSolidShape(clickedAt: RealPoint, shape: SolidShape) {
     isBetween(bottomRight.realY, rotatedClickedAt.realY, topLeft.realY)
   );
 }
+// returns [tl, tr, br, bl]
+export function getBoundaryPoints(
+  shape: SolidShape | FreeDrawnShape
+): [RealPoint, RealPoint, RealPoint, RealPoint] {
+  if (isSolidShape(shape)) {
+    const tl = shape.shapeTopLeftCoordinates;
+    const tr = { realX: tl.realX + shape.width, realY: tl.realY };
+    const bl = { realX: tl.realX, realY: tl.realY - shape.height };
+    const br = {
+      realX: tl.realX + shape.width,
+      realY: tl.realY - shape.height,
+    };
+    return [tl, tr, br, bl];
+  } else {
+    const points = shape.points;
+    const x_coordinates = points.map((e) => e.realX);
+    const y_coordinates = points.map((e) => e.realY);
+    const x1 = Math.min(...x_coordinates);
+    const x2 = Math.max(...x_coordinates);
+    const y1 = Math.max(...y_coordinates);
+    const y2 = Math.min(...y_coordinates);
+    const tl = { realX: x1, realY: y1 };
+    const tr = { realX: x2, realY: y1 };
+    const bl = { realX: x1, realY: y2 };
+    const br = { realX: x2, realY: y2 };
+    return [tl, tr, br, bl];
+  }
+}
 
 /*
 

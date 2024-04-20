@@ -1,8 +1,10 @@
 import { Canvas, SolidShape } from "../../redux/slices/editor/types";
 import {
+  getBoundaryPoints,
   getCenter,
   getVirtualDistance,
   getVirtualPoint,
+  rotateCoordinates,
 } from "../../redux/slices/editor/utils";
 
 export default function renderRect(
@@ -12,27 +14,25 @@ export default function renderRect(
 ) {
   console.log("rendering rectangle");
   const center = getCenter(shape);
-  const virtualCenter = getVirtualPoint(
-    canvasState.b,
-    center,
-    canvasState.zoom
+
+  const boundaryPoints = getBoundaryPoints(shape);
+
+  const rotatedBoundaryPoints = boundaryPoints.map((point) =>
+    rotateCoordinates(center, point, shape.xAxisInclination, false)
   );
-  ctx.translate(virtualCenter.virtualX, virtualCenter.virtualY);
-  ctx.rotate(shape.xAxisInclination);
+
+  const finalVirtualPoints = rotatedBoundaryPoints.map((point) =>
+    getVirtualPoint(canvasState.b, point, canvasState.zoom)
+  );
+
   ctx.strokeStyle = shape.backgroundColor;
-  const virtualTopLeft = getVirtualPoint(
-    canvasState.b,
-    shape.shapeTopLeftCoordinates,
-    canvasState.zoom
-  );
-  const virtualWidth = getVirtualDistance(shape.width, canvasState.zoom);
-  const virtualHeight = getVirtualDistance(shape.height, canvasState.zoom);
-  ctx.strokeRect(
-    virtualTopLeft.virtualX - virtualCenter.virtualX,
-    virtualTopLeft.virtualY - virtualCenter.virtualY,
-    virtualWidth,
-    virtualHeight
-  );
-  ctx.rotate(-shape.xAxisInclination);
-  ctx.translate(-virtualCenter.virtualX, -virtualCenter.virtualY);
+
+  const path = new Path2D();
+  path.moveTo(finalVirtualPoints[0].virtualX, finalVirtualPoints[0].virtualY);
+  for (let i = 1; i < 4; i++) {
+    path.lineTo(finalVirtualPoints[i].virtualX, finalVirtualPoints[i].virtualY);
+  }
+  path.lineTo(finalVirtualPoints[0].virtualX, finalVirtualPoints[0].virtualY);
+  ctx.beginPath();
+  ctx.stroke(path);
 }

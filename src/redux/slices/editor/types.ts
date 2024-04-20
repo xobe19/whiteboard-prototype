@@ -74,6 +74,10 @@ export interface Canvas {
   arrows: Arrow[];
   width: number;
   height: number;
+  htmlPaths: {
+    [key in string]: Path2D;
+  };
+  previousMouseMove: VirtualPoint;
 }
 
 export interface KeyState {

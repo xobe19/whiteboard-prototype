@@ -52,6 +52,8 @@ let initialState: Editor = {
     previousB: { realX: 0, realY: 0 },
     currFreeDrawPoints: [],
     arrows: [],
+    htmlPaths: {},
+    previousMouseMove: { virtualX: 0, virtualY: 0 },
   },
   keyState: {
     isCtrlDown: false,
@@ -223,7 +225,11 @@ const editorReducer = createReducer(initialState, (builder) => {
     .addCase(mouseMove, (state, action) => {
       let movData = action.payload;
 
-      movData.deltaX /= state.canvas.zoom;
+      movData.deltaX =
+        movData.virtualX - state.canvas.previousMouseMove.virtualX;
+      movData.deltaY =
+        movData.virtualY - state.canvas.previousMouseMove.virtualY;
+
       movData.deltaY /= state.canvas.zoom;
       let pnt = getRealPoint(state.canvas.b, movData, state.canvas.zoom);
       if (
@@ -406,7 +412,7 @@ const editorReducer = createReducer(initialState, (builder) => {
         if (isSolidShape(selectedShape)) {
           selectedShape.shapeTopLeftCoordinates = {
             realX: selectedShape.shapeTopLeftCoordinates.realX + movData.deltaX,
-            realY: selectedShape.shapeTopLeftCoordinates.realY + movData.deltaY,
+            realY: selectedShape.shapeTopLeftCoordinates.realY - movData.deltaY,
           };
         } else {
           selectedShape.points.forEach((point) => {
@@ -415,6 +421,10 @@ const editorReducer = createReducer(initialState, (builder) => {
           });
         }
       }
+      state.canvas.previousMouseMove = {
+        virtualX: movData.virtualX,
+        virtualY: movData.virtualY,
+      };
     })
     .addCase(zoomCanvas, (state, action) => {
       let delta = action.payload;
