@@ -1,5 +1,6 @@
 import { Canvas } from "../../redux/slices/editor/types";
 import renderBackgroundDots from "./renderBackgroundDots";
+import renderShapes from "./renderShapes";
 
 // renders the given `canvasState` onto the rendering context
 export default function renderCanvas(
@@ -9,4 +10,5 @@ export default function renderCanvas(
   console.log("canvas render");
   ctx.clearRect(0, 0, canvasState.width, canvasState.height);
   renderBackgroundDots(ctx, canvasState);
+  renderShapes(ctx, canvasState);
 }

@@ -155,6 +155,38 @@ export function getLineFromPointAndSlope(a: RealPoint, m: number): Line {
   let c = a.realY - m * a.realX;
   return { m, c };
 }
+
+export function getCenter(shape: SolidShape | FreeDrawnShape) {
+  if (isSolidShape(shape)) {
+    const topLeft = shape.shapeTopLeftCoordinates;
+    const bottomRight = {
+      realX: topLeft.realX + shape.width,
+      realY: topLeft.realY - shape.height,
+    };
+
+    const centerPoint = {
+      realX: (topLeft.realX + bottomRight.realX) / 2,
+      realY: (bottomRight.realY + topLeft.realY) / 2,
+    };
+    return centerPoint;
+  } else {
+    const points = shape.points;
+    const x_coordinates = points.map((e) => e.realX);
+    const y_coordinates = points.map((e) => e.realY);
+    const x1 = Math.min(...x_coordinates);
+    const x2 = Math.max(...x_coordinates);
+    const y1 = Math.max(...y_coordinates);
+    const y2 = Math.min(...y_coordinates);
+
+    const centerPoint = {
+      realX: (x1 + x2) / 2,
+      realY: (y1 + y2) / 2,
+    };
+
+    return centerPoint;
+  }
+}
+
 /* return format
 [tl, tr, bl, br]
 */

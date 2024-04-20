@@ -26,7 +26,7 @@ import { WritableDraft } from "immer/dist/internal.js";
 let toID = uid;
 let sampleShape1: SolidShape = {
   backgroundColor: "blue",
-  borderColor: "#00000000",
+  borderColor: "pink",
   shapeTopLeftCoordinates: { realX: 500, realY: 500 },
   id: "shape1",
   type: "rect",
@@ -148,7 +148,7 @@ const editorReducer = createReducer(initialState, (builder) => {
           id: toID(),
           type: state.toolbox.selectedSolidShapeType,
           backgroundColor: "#00000000",
-          borderColor: "#ff000000",
+          borderColor: "#c5ecebff",
           width: Math.abs(mdPoint.realX - muPoint.realX),
           height: Math.abs(mdPoint.realY - muPoint.realY),
           noteContents: "",
