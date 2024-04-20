@@ -226,10 +226,7 @@ const editorReducer = createReducer(initialState, (builder) => {
 
       movData.deltaY /= state.canvas.zoom;
       let pnt = getRealPoint(state.canvas.b, movData, state.canvas.zoom);
-      if (
-        state.canvas.mode === CanvasMode.Default &&
-        state.keyState.isRightMouseDown
-      ) {
+      if (state.keyState.isRightMouseDown) {
         state.canvas.b.realX -= movData.deltaX;
         state.canvas.b.realY += movData.deltaY;
       } else if (
