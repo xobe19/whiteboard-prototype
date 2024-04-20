@@ -49,7 +49,6 @@ let initialState: Editor = {
 
     zoom: 1.0,
     b: { realX: 0, realY: 0 },
-    previousB: { realX: 0, realY: 0 },
     currFreeDrawPoints: [],
     arrows: [],
     htmlPaths: {},
@@ -194,11 +193,6 @@ const editorReducer = createReducer(initialState, (builder) => {
             });
           }
         }
-      } else if (state.canvas.mode === CanvasMode.Default) {
-        state.canvas.previousB = {
-          realX: state.canvas.b.realX,
-          realY: state.canvas.b.realY,
-        };
       }
       state.keyState.isMouseDown = false;
     })
@@ -236,19 +230,8 @@ const editorReducer = createReducer(initialState, (builder) => {
         state.canvas.mode === CanvasMode.Default &&
         state.keyState.isRightMouseDown
       ) {
-        console.log("prevb");
-        console.log(state.canvas.previousB.realX);
-        let previousMouseDownVirtual = getVirtualPoint(
-          state.canvas.previousB,
-          state.keyState.previousMouseDown!,
-          state.canvas.zoom
-        );
-        let diffX = movData.virtualX - previousMouseDownVirtual.virtualX;
-        let diffY = movData.virtualY - previousMouseDownVirtual.virtualY;
-
-        state.canvas.b.realX = state.canvas.previousB.realX - diffX;
-        state.canvas.b.realY = state.canvas.previousB.realY + diffY;
-        console.log(`x: ${state.canvas.b.realX}, y: ${state.canvas.b.realY}`);
+        state.canvas.b.realX -= movData.deltaX;
+        state.canvas.b.realY += movData.deltaY;
       } else if (
         state.canvas.mode === CanvasMode.FreeDraw &&
         state.keyState.isMouseDown
