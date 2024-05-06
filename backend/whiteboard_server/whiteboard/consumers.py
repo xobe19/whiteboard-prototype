@@ -8,7 +8,6 @@ class BoardEventConsumer(WebsocketConsumer):
             self.accept()
         else:
             self.close()
-
     def disconnect(self, code):
         pass
     def receive(self, text_data):
