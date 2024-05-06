@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# pg pass
+
+.pg_pass
+__pycache__
