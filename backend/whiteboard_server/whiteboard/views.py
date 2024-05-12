@@ -3,6 +3,8 @@ from django.http import HttpRequest, HttpResponse
 import json
 from whiteboard.models import Canvas
 from hashlib import sha256
+from whiteboard.tasks import sync_boards_with_db
+from whiteboard.utils import add_to_q
 # Create your views here.
 
 def authenticated_boards(request: HttpRequest):
@@ -31,4 +33,13 @@ def create_whiteboard(request: HttpRequest):
 
     return HttpResponse(body)
 
+def test_view(request: HttpRequest):
+      sync_boards_with_db() 
+      return HttpResponse("debug test view ran")
+
+def send_message(request: HttpRequest):
+    msg = json.loads(request.body.decode("utf-8"))
+    add_to_q(msg)
+    return HttpResponse("done")
+    
     
